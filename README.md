@@ -7,7 +7,7 @@ Plugin types
 ------------
 
 * **Nagios Return Value**: Where the return value is either `0` = OK, `1` = Warning, `2` = Critical or `3` = Unkown, the value will be reported back to Server Density as value of the key containing the plugin name (eg. `check_hylafax` = `2`).
-* **Performance Data**: This output is in the form of `'label'=value[UOM];[warn];[crit];[min];[max]` ([see docs](http://nagiosplug.sourceforge.net/developer-guidelines.html#AEN201)). In this case, it will be returned as an additional pair. As example, the plugin `check_mailq` reports `unsent=38;10;20;0`, so an additional pair `unsent` = `38` will be reported  to Server Density. Note: this plugin will not support wrapping two plugins that report the performance data using the same label, the second value will overwrite the first.
+* **Performance Data**: This output is in the form of `'label'=value[UOM];[warn];[crit];[min];[max]` ([see docs](http://nagiosplug.sourceforge.net/developer-guidelines.html#AEN201)). In this case, it will be returned as an additional pair. As example, the plugin `check_mailq` reports `unsent=38;10;20;0`, so an additional pair `unsent` = `38` will be reported  to Server Density. *Note*: this plugin will not support wrapping two plugins that report the performance data using the same label, the second value will overwrite the first.
 
 Installing
 ----------
