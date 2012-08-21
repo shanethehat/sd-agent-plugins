@@ -60,7 +60,6 @@ Two important aspects are relevant to making sure the Nagios plugins runs as exp
 $ sudo -u sd-agent /usr/lib64/nagios/plugins/check_sensors
 sensor ok
 ```
-
 2. Some plugins may need root permissions to run. In this case a sudo wrapper may need to be used. First add a sudoers permission, using visudo append: 
 ```
 sd-agent ALL=NOPASSWD:/usr/lib64/nagios/plugins/check_mailq
