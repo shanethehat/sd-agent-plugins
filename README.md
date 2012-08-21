@@ -55,19 +55,20 @@ Troubleshooting
 Two important aspects are relevant to making sure the Nagios plugins runs as expected:
 
 1. The command line is correct. The best way to test it is to run it as `sd-agent` user:
+
 ```
 $ sudo -u sd-agent /usr/lib64/nagios/plugins/check_sensors
-
 sensor ok
 ```
+
 2. Some plugins may need root permissions to run. In this case a sudo wrapper may need to be used. First add a sudoers permission, using visudo append: 
 ```
 sd-agent ALL=NOPASSWD:/usr/lib64/nagios/plugins/check_mailq
 ```
 then create a wrapper for the actual plugin command. The agent will execute this instead, which will "proxy" the command with the sudo prefix:
+
 ```
 $ cat /usr/bin/sd-agent/check_mailq
-
 #!/bin/bash
 sudo /usr/lib64/nagios/plugins/check_mailq $@
 ```
