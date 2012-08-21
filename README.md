@@ -19,7 +19,7 @@ Installing
 ```python
 nagiosPluginsCommandLines = [
   	"/usr/lib64/nagios/plugins/check_sensors",
-		"/usr/bin/sd-agent/check_mailq -w 10 -c 20 -M postfix",
+	"/usr/bin/sd-agent/check_mailq -w 10 -c 20 -M postfix",
 	]
 ```
 
