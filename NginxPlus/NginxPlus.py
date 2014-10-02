@@ -70,7 +70,7 @@ class NginxPlus (object):
                             data[name] = items['responses'].get('4xx', None)
 
                             # Responses: 5xx
-                            name = 'zone_%s_responses_500' % zone
+                            name = 'zone_%s_responses_5xx' % zone
                             data[name] = items['responses'].get('5xx', None)
 
                 # Upstreams
