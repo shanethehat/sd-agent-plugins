@@ -3,4 +3,4 @@
 set -e
 set -u
 
-pep8 --ignore=E501 .
+pep8 .

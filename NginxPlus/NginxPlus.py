@@ -32,10 +32,14 @@ class NginxPlus (object):
 
                 # Connections
                 if 'connections' in status:
-                    data['connections_accepted'] = status['connections'].get('accepted', None)
-                    data['connections_dropped'] = status['connections'].get('dropped', None)
-                    data['connections_active'] = status['connections'].get('active', None)
-                    data['connections_idle'] = status['connections'].get('idle', None)
+                    data['connections_accepted'] = status['connections'].get(
+                        'accepted', None)
+                    data['connections_dropped'] = status['connections'].get(
+                        'dropped', None)
+                    data['connections_active'] = status['connections'].get(
+                        'active', None)
+                    data['connections_idle'] = status['connections'].get(
+                        'idle', None)
 
                 # Requests
                 data['requests_total'] = status['requests']['total']
@@ -81,44 +85,60 @@ class NginxPlus (object):
 
                             if 'server' in server:
                                 # State
-                                name = 'upstream_%s_%s_state' % (group, server['server'])
+                                name = 'upstream_%s_%s_state' % (
+                                    group, server['server'])
                                 data[name] = server.get('state', 'unknown')
 
                                 # Requests
-                                name = 'upstream_%s_%s_requests' % (group, server['server'])
+                                name = 'upstream_%s_%s_requests' % (
+                                    group, server['server'])
                                 data[name] = server.get('requests', None)
 
                                 # Responses
                                 if 'responses' in server:
-                                    name = 'upstream_%s_%s_responses_total' % (group, server['server'])
-                                    data[name] = server['responses'].get('total', None)
+                                    name = 'upstream_%s_%s_responses_total' % (
+                                        group, server['server'])
+                                    data[name] = server['responses'].get(
+                                        'total', None)
 
                                     # Requests: 1xx
-                                    name = 'upstream_%s_%s_responses_1xx' % (group, server['server'])
-                                    data[name] = server['responses'].get('1xx', None)
+                                    name = 'upstream_%s_%s_responses_1xx' % (
+                                        group, server['server'])
+                                    data[name] = server['responses'].get(
+                                        '1xx', None)
 
                                     # Responses: 2xx
-                                    name = 'upstream_%s_%s_responses_2xx' % (group, server['server'])
-                                    data[name] = server['responses'].get('2xx', None)
+                                    name = 'upstream_%s_%s_responses_2xx' % (
+                                        group, server['server'])
+                                    data[name] = server['responses'].get(
+                                        '2xx', None)
 
                                     # Responses: 3xx
-                                    name = 'upstream_%s_%s_responses_3xx' % (group, server['server'])
-                                    data[name] = server['responses'].get('3xx', None)
+                                    name = 'upstream_%s_%s_responses_3xx' % (
+                                        group, server['server'])
+                                    data[name] = server['responses'].get(
+                                        '3xx', None)
 
                                     # Responses: 4xx
-                                    name = 'upstream_%s_%s_responses_4xx' % (group, server['server'])
-                                    data[name] = server['responses'].get('4xx', None)
+                                    name = 'upstream_%s_%s_responses_4xx' % (
+                                        group, server['server'])
+                                    data[name] = server['responses'].get(
+                                        '4xx', None)
 
                                     # Responses: 5xx
-                                    name = 'upstream_%s_%s_responses_5xx' % (group, server['server'])
-                                    data[name] = server['responses'].get('5xx', None)
+                                    name = 'upstream_%s_%s_responses_5xx' % (
+                                        group, server['server'])
+                                    data[name] = server['responses'].get(
+                                        '5xx', None)
 
                                 # Fails
-                                name = 'upstream_%s_%s_fails' % (group, server['server'])
+                                name = 'upstream_%s_%s_fails' % (
+                                    group, server['server'])
                                 data[name] = server.get('fails', None)
 
                                 # Unavail
-                                name = 'upstream_%s_%s_unavail' % (group, server['server'])
+                                name = 'upstream_%s_%s_unavail' % (
+                                    group, server['server'])
                                 data[name] = server.get('unavail', None)
 
                 return data
@@ -134,27 +154,34 @@ class NginxPlus (object):
         try:
             self.mainLogger.debug('NginxPlus: attempting urlopen')
 
-            req = urllib2.Request(self.agentConfig['nginxStatusUrl'], None, headers)
+            req = urllib2.Request(
+                self.agentConfig['nginxStatusUrl'], None, headers)
 
             # Do the request, log any errors
             request = urllib2.urlopen(req)
             response = request.read()
 
         except urllib2.HTTPError, e:
-            self.mainLogger.error('NginxPlus: Unable to get Nginx status - HTTPError = %s', e)
+            self.mainLogger.error(
+                'NginxPlus: Unable to get Nginx status - HTTPError = %s', e)
             return False
 
         except urllib2.URLError, e:
-            self.mainLogger.error('NginxPlus: Unable to get Nginx status - URLError = %s', e)
+            self.mainLogger.error(
+                'NginxPlus: Unable to get Nginx status - URLError = %s', e)
             return False
 
         except httplib.HTTPException, e:
-            self.mainLogger.error('NginxPlus: Unable to get Nginx status - HTTPException = %s', e)
+            self.mainLogger.error(
+                'NginxPlus: Unable to get Nginx status - HTTPException = %s',
+                e)
             return False
 
         except Exception:
             import traceback
-            self.mainLogger.error('NginxPlus: Unable to get Nginx status - Exception = %s', traceback.format_exc())
+            self.mainLogger.error(
+                'NginxPlus: Unable to get Nginx status - Exception = %s',
+                traceback.format_exc())
             return False
 
         self.mainLogger.debug('NginxPlus: urlopen success')
@@ -164,7 +191,9 @@ class NginxPlus (object):
 
         except Exception:
             import traceback
-            self.mainLogger.error('NginxPlus: JSON parsing error - Exception = %s', traceback.format_exc())
+            self.mainLogger.error(
+                'NginxPlus: JSON parsing error - Exception = %s',
+                traceback.format_exc())
             return False
 
         self.mainLogger.debug('NginxPlus: parsed JSON')
