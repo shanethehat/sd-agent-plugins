@@ -18,9 +18,9 @@ Installing
 
 ```python
 nagiosPluginsCommandLines = [
-  >."/usr/lib64/nagios/plugins/check_sensors",
->..."/usr/bin/sd-agent/check_mailq -w 10 -c 20 -M postfix",
->...]
+    "/usr/lib64/nagios/plugins/check_sensors",
+    "/usr/bin/sd-agent/check_mailq -w 10 -c 20 -M postfix",
+]
 ```
 
 The `check_mailq` plugin is installed along with Nagios. `check_sensors` is a [3rd party plugin](http://exchange.nagios.org/directory/Plugins/System-Metrics/Environmental/check_sensors/details).
