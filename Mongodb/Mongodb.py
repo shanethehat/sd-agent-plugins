@@ -6,7 +6,7 @@
 # https://github.com/serverdensity/sd-agent-plugins/
 
 #
-# Version: 0.4.0
+# Version: 0.5.0
 #
 
 import collections
@@ -256,7 +256,7 @@ class Mongodb (object):
                                 time_locked = time_locked_r + time_locked_w
                                 if time_locked > highest_lock:
                                     highest_lock = time_locked
-                        status['lock_percent'] = (lock_time + (highest_lock / 1000.0)) / float(total_time) * 100.0
+                        status['lock_percent'] = (lock_time + highest_lock) / float(total_time) * 100.0
 
             except KeyError, ex:
                 self.checks_logger.error('mongodb_plugin: per second metrics KeyError exception = %s', ex)
