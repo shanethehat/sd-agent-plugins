@@ -3,6 +3,10 @@ MongoDB Plugin
 
 This plugin gets stats from a [MongoDB server](http://www.mongodb.com) 
 
+Requirements
+---
+* Pymongo
+
 Configuration
 ---
 1. Set your mongoDB host and port, by default the plugin assumes 127.0.0.1 and 27017. To do so use the agent configuration entry: mongodb_plugin_server.
@@ -12,8 +16,18 @@ Example: 127.0.0.1:27017
 
 Parameters
 ---
+All parameters must be in the MongoDB section of the configuration file
 * `mongodb_plugin_server` - MongoDB server host and port in the format host:port
 * `mongodb_plugin_dbstats` - Define if the individual database metrics are to be collected. The metrics will be collected if the value is "yes"
+* `mongodb_plugin_replset` - Replica set configuration is collected if the value is "yes"
+Example:
+
+```
+[MongoDB]
+mongodb_plugin_server: 127.0.0.1:27017
+mongodb_plugin_dbstats: yes
+mongodb_plugin_replset: no
+```
 
 Recommended alerts
 ---

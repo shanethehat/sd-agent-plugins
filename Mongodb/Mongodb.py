@@ -6,7 +6,7 @@
 # https://github.com/serverdensity/sd-agent-plugins/
 
 #
-# Version: 0.2.0
+# Version: 0.4.0
 #
 
 import collections
@@ -43,7 +43,7 @@ class Mongodb (object):
         self.connection = None
 
     def preliminaries(self):
-        if 'mongodb_plugin_server' not in self.agent_config or self.agent_config['mongodb_plugin_server'] == '':
+        if 'MongoDB' not in self.raw_config or 'mongodb_plugin_server' not in self.raw_config['MongoDB'] or self.raw_config['MongoDB']['mongodb_plugin_server'] == '':
             self.checks_logger.debug('mongodb_plugin: config not set')
             return False
 
@@ -62,7 +62,7 @@ class Mongodb (object):
     def get_connection(self):
         try:
             import urlparse
-            parsed = urlparse.urlparse(self.agent_config['mongodb_plugin_server'])
+            parsed = urlparse.urlparse(self.raw_config['MongoDB']['mongodb_plugin_server'])
 
             mongo_uri = ''
 
@@ -82,7 +82,7 @@ class Mongodb (object):
 
             else:
 
-                mongo_uri = self.agent_config['mongodb_plugin_server']
+                mongo_uri = self.raw_config['MongoDB']['mongodb_plugin_server']
 
             self.checks_logger.debug('-- mongo_uri: %s', mongo_uri)
 
@@ -267,8 +267,6 @@ class Mongodb (object):
                 except:
                     self.checks_logger.error('mongodb_plugin: could not save metrics to calculate differentials')
 
-
-
             # Cursors
             try:
                 self.checks_logger.debug('mongodb_plugin: cursors')
@@ -280,7 +278,7 @@ class Mongodb (object):
                 pass
 
             # Replica set status
-            if 'MongoDBReplSet' in self.agent_config and self.agent_config['MongoDBReplSet'] == 'yes':
+            if 'mongodb_plugin_replset' in self.raw_config['MongoDB'] and self.raw_config['MongoDB']['mongodb_plugin_replset'] == 'yes':
                 self.checks_logger.debug('mongodb_plugin: get replset status too')
 
                 # isMaster (to get state
@@ -335,7 +333,7 @@ class Mongodb (object):
                         status['replSet']['members'][str(member['_id'])]['error'] = member['errmsg']
 
             # db.stats()
-            if 'MongoDBDBStats' in self.agent_config and self.agent_config['MongoDBDBStats'] == 'yes':
+            if 'mongodb_plugin_dbstats' in self.raw_config['MongoDB'] and self.raw_config['MongoDB']['mongodb_plugin_dbstats'] == 'yes':
                 self.checks_logger.debug('mongodb_plugin: db.stats() too')
 
                 for database in self.connection.database_names():
@@ -421,7 +419,8 @@ if __name__ == "__main__":
 
     main_agent_config = {
         'mongodb_plugin_server': "{0}:{1}".format(host, port),
-        'mongodb_plugin_dbstats': 'yes'
+        'mongodb_plugin_dbstats': 'yes',
+        'mongodb_plugin_replset': 'no'
     }
 
     main_checks_logger = logging.getLogger('MongodbPlugin')
