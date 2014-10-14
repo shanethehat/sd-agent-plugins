@@ -6,7 +6,7 @@
 # https://github.com/serverdensity/sd-agent-plugins/
 
 #
-# Version: 0.5.0
+# Version: 1.0.0
 #
 
 import collections
