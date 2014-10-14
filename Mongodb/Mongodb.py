@@ -22,7 +22,8 @@ except ImportError:
 
 
 # Code snipped taken from
-# http://stackoverflow.com/questions/6027558/flatten-nested-python-dictionaries-compressing-keys
+# http://stackoverflow.com/questions/6027558/\
+# flatten-nested-python-dictionaries-compressing-keys
 def flatten(d, parent_key='', sep='_'):
     items = []
     for k, v in d.items():
@@ -43,7 +44,9 @@ class Mongodb (object):
         self.connection = None
 
     def preliminaries(self):
-        if 'MongoDB' not in self.raw_config or 'mongodb_plugin_server' not in self.raw_config['MongoDB'] or self.raw_config['MongoDB']['mongodb_plugin_server'] == '':
+        if ('MongoDB' not in self.raw_config
+                or 'mongodb_plugin_server' not in self.raw_config['MongoDB']
+                or self.raw_config['MongoDB']['mongodb_plugin_server'] == ''):
             self.checks_logger.debug('mongodb_plugin: config not set')
             return False
 
@@ -54,7 +57,9 @@ class Mongodb (object):
             from pymongo import MongoClient
 
         except ImportError:
-            self.checks_logger.error('mongodb_plugin: unable to import pymongo library')
+            self.checks_logger.error(
+                'mongodb_plugin: unable to import pymongo library'
+            )
             return False
 
         return True
@@ -62,7 +67,9 @@ class Mongodb (object):
     def get_connection(self):
         try:
             import urlparse
-            parsed = urlparse.urlparse(self.raw_config['MongoDB']['mongodb_plugin_server'])
+            parsed = urlparse.urlparse(
+                self.raw_config['MongoDB']['mongodb_plugin_server']
+            )
 
             mongo_uri = ''
 
@@ -86,13 +93,18 @@ class Mongodb (object):
 
             self.checks_logger.debug('-- mongo_uri: %s', mongo_uri)
 
-            self.connection = MongoClient(mongo_uri, read_preference=pymongo.ReadPreference.SECONDARY)
+            self.connection = MongoClient(
+                mongo_uri
+            )
 
             self.checks_logger.debug('Connected to MongoDB')
 
         except Exception:
             self.checks_logger.error(
-                'Unable to connect to MongoDB server %s - Exception = %s', mongo_uri, traceback.format_exc())
+                'Unable to connect to MongoDB server %s - Exception = %s',
+                mongo_uri,
+                traceback.format_exc()
+            )
             return False
         return True
 
@@ -111,8 +123,8 @@ class Mongodb (object):
             db = self.connection['local']
 
             # Server status
-            status_output = db.command('serverStatus', recordStats=0)       # Shorthand for {'serverStatus': 1}
-
+            # Shorthand for {'serverStatus': 1}
+            status_output = db.command('serverStatus', recordStats=0)
             self.checks_logger.debug('mongodb_plugin: executed serverStatus')
 
             # Setup
@@ -122,11 +134,16 @@ class Mongodb (object):
             try:
                 status['version'] = status_output['version']
 
-                self.checks_logger.debug('mongodb_plugin: version %s', status_output['version'])
+                self.checks_logger.debug(
+                    'mongodb_plugin: version %s',
+                    status_output['version']
+                )
 
             except KeyError, ex:
-                self.checks_logger.error('mongodb_plugin: version KeyError exception = %s', ex)
-                pass
+                self.checks_logger.error(
+                    'mongodb_plugin: version KeyError exception = %s',
+                    ex
+                )
 
             # Global locks
             try:
@@ -137,16 +154,24 @@ class Mongodb (object):
 
                     self.checks_logger.debug('mongodb_plugin: globalLock')
 
-                    status['globalLock_ratio'] = status_output['globalLock']['ratio']
-                    status['globalLock_currentQueue_total'] = status_output['globalLock']['currentQueue']['total']
-                    status['globalLock_currentQueue_readers'] = status_output['globalLock']['currentQueue']['readers']
-                    status['globalLock_currentQueue_writers'] = status_output['globalLock']['currentQueue']['writers']
+                    status['globalLock_ratio'] = \
+                        status_output['globalLock']['ratio']
+                    status['globalLock_currentQueue_total'] = \
+                        status_output['globalLock']['currentQueue']['total']
+                    status['globalLock_currentQueue_readers'] = \
+                        status_output['globalLock']['currentQueue']['readers']
+                    status['globalLock_currentQueue_writers'] = \
+                        status_output['globalLock']['currentQueue']['writers']
 
                 else:
-                    self.checks_logger.debug('mongodb_plugin: version >= 2.2, not getting globalLock status')
+                    self.checks_logger.debug(
+                        'mongodb_plugin: version >= 2.2, '
+                        'not getting globalLock status'
+                    )
 
             except KeyError, ex:
-                self.checks_logger.error('mongodb_plugin: globalLock KeyError exception = %s', ex)
+                self.checks_logger.error(
+                    'mongodb_plugin: globalLock KeyError exception = %s', ex)
                 pass
 
             # Memory
@@ -158,128 +183,259 @@ class Mongodb (object):
                 status['mem_mapped'] = status_output['mem']['mapped']
 
             except KeyError, ex:
-                self.checks_logger.error('mongodb_plugin: memory KeyError exception = %s', ex)
+                self.checks_logger.error(
+                    'mongodb_plugin: memory KeyError exception = %s', ex)
                 pass
 
             # Connections
             try:
                 self.checks_logger.debug('mongodb_plugin: connections')
 
-                status['connections_current'] = status_output['connections']['current']
-                status['connections_available'] = status_output['connections']['available']
+                status['connections_current'] = \
+                    status_output['connections']['current']
+                status['connections_available'] = \
+                    status_output['connections']['available']
 
             except KeyError, ex:
-                self.checks_logger.error('mongodb_plugin: connections KeyError exception = %s', ex)
+                self.checks_logger.error(
+                    'mongodb_plugin: connections KeyError exception = %s', ex)
                 pass
 
             # Extra info (Linux only)
             try:
                 self.checks_logger.debug('mongodb_plugin: extra info')
 
-                status['extraInfo_heapUsage'] = status_output['extra_info']['heap_usage_bytes']
-                status['extraInfo_pageFaults'] = status_output['extra_info']['page_faults']
+                status['extraInfo_heapUsage'] = \
+                    status_output['extra_info']['heap_usage_bytes']
+                status['extraInfo_pageFaults'] = \
+                    status_output['extra_info']['page_faults']
 
             except KeyError, ex:
-                self.checks_logger.debug('mongodb_plugin: extra info KeyError exception = %s', ex)
+                self.checks_logger.debug(
+                    'mongodb_plugin: extra info KeyError exception = %s', ex)
                 pass
 
             # Background flushing
             try:
                 self.checks_logger.debug('mongodb_plugin: backgroundFlushing')
 
-                delta = datetime.datetime.utcnow() - status_output['backgroundFlushing']['last_finished']
-                status['backgroundFlushing_secondsSinceLastFlush'] = delta.seconds
-                status['backgroundFlushing_lastFlushLength'] = status_output['backgroundFlushing']['last_ms']
-                status['backgroundFlushing_flushLengthAvrg'] = status_output['backgroundFlushing']['average_ms']
+                delta = (
+                    datetime.datetime.utcnow()
+                    -
+                    status_output['backgroundFlushing']['last_finished']
+                )
+                status['backgroundFlushing_secondsSinceLastFlush'] = \
+                    delta.seconds
+                status['backgroundFlushing_lastFlushLength'] = \
+                    status_output['backgroundFlushing']['last_ms']
+                status['backgroundFlushing_flushLengthAvrg'] = \
+                    status_output['backgroundFlushing']['average_ms']
 
             except KeyError, ex:
-                self.checks_logger.debug('mongodb_plugin: backgroundFlushing KeyError exception = %s', ex)
-                pass
+                self.checks_logger.debug(
+                    'mongodb_plugin: backgroundFlushing KeyError = %s',
+                    ex)
 
             # Per second metric calculations (opcounts and asserts)
             try:
                 if self.mongo_DB_store is None:
-                    self.checks_logger.debug('mongodb_plugin: per second metrics no cached data, so storing for first time')
+                    self.checks_logger.debug(
+                        'mongodb_plugin: per second metrics no '
+                        'cached data, so storing for first time'
+                    )
                     self.set_mongo_db_store(status_output)
 
                 else:
-                    self.checks_logger.debug('mongodb_plugin: per second metrics cached data exists')
+                    self.checks_logger.debug(
+                        'mongodb_plugin: per second metrics cached data exists'
+                    )
 
                     if (split_version[0] <= 2) and (split_version[1] < 4):
 
-                        accesses_ps = float(status_output['indexCounters']['btree']['accesses'] - self.mongo_DB_store['indexCounters']['accessesPS']) / 60
+                        accesses_ps = float(
+                            status_output['indexCounters']['btree']['accesses']
+                            -
+                            self.mongo_DB_store['indexCounters']['accessesPS']
+                        ) / 60
 
                         if accesses_ps >= 0:
                             status['indexCounters_accessesPS'] = accesses_ps
-                            status['indexCounters_hitsPS'] = float(status_output['indexCounters']['btree']['hits'] - self.mongo_DB_store['indexCounters']['hitsPS']) / 60
-                            status['indexCounters_missesPS'] = float(status_output['indexCounters']['btree']['misses'] - self.mongo_DB_store['indexCounters']['missesPS']) / 60
-                            status['indexCounters_missRatioPS'] = float(status_output['indexCounters']['btree']['missRatio'] - self.mongo_DB_store['indexCounters']['missRatioPS']) / 60
+                            status['indexCounters_hitsPS'] = float(
+                                status_output['indexCounters']['btree']['hits']
+                                -
+                                self.mongo_DB_store['indexCounters']['hitsPS']
+                            ) / 60
+                            status['indexCounters_missesPS'] = float(
+                                status_output['indexCounters']
+                                ['btree']['misses']
+                                -
+                                self.mongo_DB_store['indexCounters']
+                                ['missesPS']
+                            ) / 60
+                            status['indexCounters_missRatioPS'] = float(
+                                status_output['indexCounters']
+                                ['btree']['missRatio']
+                                -
+                                self.mongo_DB_store['indexCounters']
+                                ['missRatioPS']
+                            ) / 60
 
                     elif (split_version[0] <= 2) and (split_version[1] >= 4):
 
-                        accesses_ps = float(status_output['indexCounters']['accesses'] - self.mongo_DB_store['indexCounters']['accessesPS']) / 60
+                        accesses_ps = float(
+                            status_output['indexCounters']['accesses'] -
+                            self.mongo_DB_store['indexCounters']['accessesPS']
+                        ) / 60
 
                         if accesses_ps >= 0:
                             status['indexCounters_accessesPS'] = accesses_ps
-                            status['indexCounters_hitsPS'] = float(status_output['indexCounters']['hits'] - self.mongo_DB_store['indexCounters']['hitsPS']) / 60
-                            status['indexCounters_missesPS'] = float(status_output['indexCounters']['misses'] - self.mongo_DB_store['indexCounters']['missesPS']) / 60
-                            status['indexCounters_missRatioPS'] = float(status_output['indexCounters']['missRatio'] - self.mongo_DB_store['indexCounters']['missRatioPS']) / 60
+                            status['indexCounters_hitsPS'] = float(
+                                status_output['indexCounters']['hits'] -
+                                self.mongo_DB_store['indexCounters']['hitsPS']
+                            ) / 60
+                            status['indexCounters_missesPS'] = float(
+                                status_output['indexCounters']['misses'] -
+                                self.mongo_DB_store['indexCounters']
+                                ['missesPS']
+                            ) / 60
+                            status['indexCounters_missRatioPS'] = float(
+                                status_output['indexCounters']['missRatio'] -
+                                self.mongo_DB_store['indexCounters']
+                                ['missRatioPS']
+                            ) / 60
                     else:
-                        self.checks_logger.debug('mongodb_plugin: per second metrics negative value calculated, mongod likely restarted, so clearing cache')
+                        self.checks_logger.debug(
+                            'mongodb_plugin: per second metrics negative value'
+                            ' calculated, mongod likely restarted, so clearing'
+                            ' cache'
+                        )
 
                     if accesses_ps >= 0:
-                        status['opCounters_insertPS'] = float(status_output['opcounters']['insert'] - self.mongo_DB_store['opCounters']['insertPS']) / 60
-                        status['opCounters_queryPS'] = float(status_output['opcounters']['query'] - self.mongo_DB_store['opCounters']['queryPS']) / 60
-                        status['opCounters_updatePS'] = float(status_output['opcounters']['update'] - self.mongo_DB_store['opCounters']['updatePS']) / 60
-                        status['opCounters_deletePS'] = float(status_output['opcounters']['delete'] - self.mongo_DB_store['opCounters']['deletePS']) / 60
-                        status['opCounters_getmorePS'] = float(status_output['opcounters']['getmore'] - self.mongo_DB_store['opCounters']['getmorePS']) / 60
-                        status['opCounters_commandPS'] = float(status_output['opcounters']['command'] - self.mongo_DB_store['opCounters']['commandPS']) / 60
+                        status['opCounters_insertPS'] = float(
+                            status_output['opcounters']['insert'] -
+                            self.mongo_DB_store['opCounters']['insertPS']) / 60
+                        status['opCounters_queryPS'] = float(
+                            status_output['opcounters']['query'] -
+                            self.mongo_DB_store['opCounters']['queryPS']) / 60
+                        status['opCounters_updatePS'] = float(
+                            status_output['opcounters']['update'] -
+                            self.mongo_DB_store['opCounters']['updatePS']) / 60
+                        status['opCounters_deletePS'] = float(
+                            status_output['opcounters']['delete'] -
+                            self.mongo_DB_store['opCounters']['deletePS']) / 60
+                        status['opCounters_getmorePS'] = float(
+                            status_output['opcounters']['getmore'] -
+                            self.mongo_DB_store['opCounters']['getmorePS']
+                        ) / 60
+                        status['opCounters_commandPS'] = float(
+                            status_output['opcounters']['command'] -
+                            self.mongo_DB_store['opCounters']['commandPS']
+                        ) / 60
 
-                        status['asserts_regularPS'] = float(status_output['asserts']['regular'] - self.mongo_DB_store['asserts']['regularPS']) / 60
-                        status['asserts_warningPS'] = float(status_output['asserts']['warning'] - self.mongo_DB_store['asserts']['warningPS']) / 60
-                        status['asserts_msgPS'] = float(status_output['asserts']['msg'] - self.mongo_DB_store['asserts']['msgPS']) / 60
-                        status['asserts_userPS'] = float(status_output['asserts']['user'] - self.mongo_DB_store['asserts']['userPS']) / 60
-                        status['asserts_rolloversPS'] = float(status_output['asserts']['rollovers'] - self.mongo_DB_store['asserts']['rolloversPS']) / 60
+                        status['asserts_regularPS'] = float(
+                            status_output['asserts']['regular'] -
+                            self.mongo_DB_store['asserts']['regularPS']) / 60
+                        status['asserts_warningPS'] = float(
+                            status_output['asserts']['warning'] -
+                            self.mongo_DB_store['asserts']['warningPS']) / 60
+                        status['asserts_msgPS'] = float(
+                            status_output['asserts']['msg'] -
+                            self.mongo_DB_store['asserts']['msgPS']) / 60
+                        status['asserts_userPS'] = float(
+                            status_output['asserts']['user'] -
+                            self.mongo_DB_store['asserts']['userPS']) / 60
+                        status['asserts_rolloversPS'] = float(
+                            status_output['asserts']['rollovers'] -
+                            self.mongo_DB_store['asserts']['rolloversPS']) / 60
                     if 'globalLock' in self.mongo_DB_store:
-                        total_time = float(status_output['globalLock']['totalTime'] - self.mongo_DB_store['globalLock']['totalTime'])
-                        lock_time = float(status_output['globalLock']['lockTime'] - self.mongo_DB_store['globalLock']['lockTime'])
-                        status['global_lock_percent'] = (lock_time / total_time) * 100.0
+                        total_time = float(
+                            status_output['globalLock']['totalTime'] -
+                            self.mongo_DB_store['globalLock']['totalTime'])
+                        lock_time = float(
+                            status_output['globalLock']['lockTime'] -
+                            self.mongo_DB_store['globalLock']['lockTime'])
+                        status['global_lock_percent'] = \
+                            (lock_time / total_time) * 100.0
                         highest_lock = 0
                         for database_name in status_output['locks'].keys():
-                            if database_name in self.mongo_DB_store['locks'] and database_name in status_output['locks']:
-                                if 'r' in status_output['locks'][database_name]['timeLockedMicros']:
-                                    time_locked_r = float(status_output['locks'][database_name]['timeLockedMicros']['r'] - self.mongo_DB_store['locks'][database_name]['timeLockedMicros']['r'])
-                                    time_locked_w = float(status_output['locks'][database_name]['timeLockedMicros']['w'] - self.mongo_DB_store['locks'][database_name]['timeLockedMicros']['w'])
-                                elif 'R' in status_output['locks'][database_name]['timeLockedMicros']:
-                                    time_locked_r = float(status_output['locks'][database_name]['timeLockedMicros']['R'] - self.mongo_DB_store['locks'][database_name]['timeLockedMicros']['R'])
-                                    time_locked_w = float(status_output['locks'][database_name]['timeLockedMicros']['W'] - self.mongo_DB_store['locks'][database_name]['timeLockedMicros']['W'])
+                            if (database_name in self.mongo_DB_store['locks']
+                                    and
+                                    database_name in status_output['locks']):
+                                if 'r' in (
+                                        status_output['locks'][database_name]
+                                        ['timeLockedMicros']):
+                                    time_locked_r = float(
+                                        status_output['locks'][database_name]
+                                        ['timeLockedMicros']['r'] -
+                                        self.mongo_DB_store['locks']
+                                        [database_name]['timeLockedMicros']
+                                        ['r']
+                                    )
+                                    time_locked_w = float(
+                                        status_output['locks'][database_name]
+                                        ['timeLockedMicros']['w'] -
+                                        self.mongo_DB_store['locks']
+                                        [database_name]['timeLockedMicros']
+                                        ['w']
+                                    )
+                                elif 'R' in (
+                                    status_output['locks']
+                                     [database_name]
+                                     ['timeLockedMicros']
+                                ):
+                                    time_locked_r = float(
+                                        status_output['locks'][database_name]
+                                        ['timeLockedMicros']['R'] -
+                                        self.mongo_DB_store['locks']
+                                        [database_name]['timeLockedMicros']
+                                        ['R']
+                                    )
+                                    time_locked_w = float(
+                                        status_output['locks'][database_name]
+                                        ['timeLockedMicros']['W'] -
+                                        self.mongo_DB_store['locks']
+                                        [database_name]['timeLockedMicros']
+                                        ['W']
+                                    )
                                 time_locked = time_locked_r + time_locked_w
                                 if time_locked > highest_lock:
                                     highest_lock = time_locked
-                        status['lock_percent'] = (lock_time + highest_lock) / float(total_time) * 100.0
+                        status['lock_percent'] = ((lock_time + highest_lock)
+                                                  / float(total_time) * 100.0)
 
             except KeyError, ex:
-                self.checks_logger.error('mongodb_plugin: per second metrics KeyError exception = %s', ex)
+                self.checks_logger.error(
+                    'mongodb_plugin: per second metrics KeyError exception = '
+                    '%s', ex)
                 pass
             finally:
                 try:
                     self.set_mongo_db_store(status_output)
                 except:
-                    self.checks_logger.error('mongodb_plugin: could not save metrics to calculate differentials')
+                    self.checks_logger.error(
+                        'mongodb_plugin: could not save metrics to calculate '
+                        'differentials')
 
             # Cursors
             try:
                 self.checks_logger.debug('mongodb_plugin: cursors')
 
-                status['cursors_totalOpen'] = status_output['cursors']['totalOpen']
+                status['cursors_totalOpen'] = \
+                    status_output['cursors']['totalOpen']
 
             except KeyError, ex:
-                self.checks_logger.error('mongodb_plugin: cursors KeyError exception = %s', ex)
+                self.checks_logger.error(
+                    'mongodb_plugin: cursors KeyError exception = %s', ex)
                 pass
 
             # Replica set status
-            if 'mongodb_plugin_replset' in self.raw_config['MongoDB'] and self.raw_config['MongoDB']['mongodb_plugin_replset'] == 'yes':
-                self.checks_logger.debug('mongodb_plugin: get replset status too')
+            if (
+                'mongodb_plugin_replset' in self.raw_config['MongoDB']
+                and
+                self.raw_config['MongoDB']['mongodb_plugin_replset'] == 'yes'
+            ):
+                self.checks_logger.debug(
+                    'mongodb_plugin: get replset status too')
 
                 # isMaster (to get state
                 isMaster = db.command('isMaster')
@@ -299,7 +455,8 @@ class Mongodb (object):
                 db = self.connection['admin']
                 repl_set = db.command('replSetGetStatus')
 
-                self.checks_logger.debug('mongodb_plugin: executed replSetGetStatus')
+                self.checks_logger.debug(
+                    'mongodb_plugin: executed replSetGetStatus')
 
                 status['replSet_myState'] = repl_set['myState']
 
@@ -307,55 +464,94 @@ class Mongodb (object):
 
                 for member in repl_set['members']:
 
-                    self.checks_logger.debug('mongodb_plugin: replSetGetStatus looping %s', member['name'])
+                    self.checks_logger.debug(
+                        'mongodb_plugin: replSetGetStatus looping %s',
+                        member['name'])
 
-                    status['replSet']['members'][str(member['_id'])] = {}
-
-                    status['replSet']['members'][str(member['_id'])]['name'] = member['name']
-                    status['replSet']['members'][str(member['_id'])]['state'] = member['state']
+                    status['replSet']['members'][str(member['_id'])] = {
+                        'name': member['name'],
+                        'state': member['state']
+                    }
 
                     # Optime delta (only available from not self)
-                    # Calculation is from http://docs.python.org/library/datetime.html#datetime.timedelta.total_seconds
-                    if 'optimeDate' in member:          # Only available as of 1.7.2
-                        deltaOptime = datetime.datetime.utcnow() - member['optimeDate']
-                        status['replSet']['members'][str(member['_id'])]['optimeDate'] = (deltaOptime.microseconds + (deltaOptime.seconds + deltaOptime.days * 24 * 3600) * 10**6) / 10**6
+                    # Calculation is from http://docs.python.org/library/\
+                    # datetime.html#datetime.timedelta.total_seconds
+                    # Only available as of 1.7.2
+                    if 'optimeDate' in member:
+                        deltaOptime = (datetime.datetime.utcnow() -
+                                       member['optimeDate'])
+                        optime = (deltaOptime.microseconds +
+                                  (deltaOptime.seconds +
+                                      deltaOptime.days * 24 * 3600) *
+                                  10**6) / 10**6
+                        (status['replSet']['members'][str(member['_id'])]
+                         ['optimeDate']) = optime
 
                     if 'self' in member:
                         status['replSet']['myId'] = member['_id']
 
-                    # Have to do it manually because total_seconds() is only available as of Python 2.7
+                    # Have to do it manually because total_seconds()
+                    #  is only available as of Python 2.7
                     else:
                         if 'lastHeartbeat' in member:
-                            delta_heartbeat = datetime.datetime.utcnow() - member['lastHeartbeat']
-                            status['replSet']['members'][str(member['_id'])]['lastHeartbeat'] = (delta_heartbeat.microseconds + (delta_heartbeat.seconds + delta_heartbeat.days * 24 * 3600) * 10**6) / 10**6
-
+                            delta_heartbeat = datetime.datetime.utcnow() - \
+                                member['lastHeartbeat']
+                            last_heartbeat = (
+                                delta_heartbeat.microseconds +
+                                (
+                                    delta_heartbeat.seconds +
+                                    delta_heartbeat.days * 24 * 3600
+                                ) * 10**6
+                            ) / 10**6
+                            (status['replSet']['members'][str(member['_id'])]
+                             ['lastHeartbeat']) = last_heartbeat
                     if 'errmsg' in member:
-                        status['replSet']['members'][str(member['_id'])]['error'] = member['errmsg']
+                        (status['replSet']['members'][str(member['_id'])]
+                            ['error']) = member['errmsg']
 
             # db.stats()
-            if 'mongodb_plugin_dbstats' in self.raw_config['MongoDB'] and self.raw_config['MongoDB']['mongodb_plugin_dbstats'] == 'yes':
+            if ('mongodb_plugin_dbstats' in self.raw_config['MongoDB']
+                    and self.raw_config['MongoDB']['mongodb_plugin_dbstats'] ==
+                    'yes'):
                 self.checks_logger.debug('mongodb_plugin: db.stats() too')
 
                 for database in self.connection.database_names():
 
-                    if database != 'config' and database != 'local' and database != 'admin' and database != 'test':
+                    if (database != 'config'
+                            and database != 'local'
+                            and database != 'admin'
+                            and database != 'test'):
 
-                        self.checks_logger.debug('mongodb_plugin: executing db.stats() for %s', database)
+                        self.checks_logger.debug(
+                            'mongodb_plugin: executing db.stats() for %s',
+                            database
+                        )
 
                         dbstats_database = 'dbStats_{0}'.format(database)
-                        dbstats_database_namespaces = 'dbStats_{0}_namespaces'.format(database)
+                        dbstats_database_namespaces = \
+                            'dbStats_{0}_namespaces'.format(database)
 
-                        status[dbstats_database] = self.connection[database].command('dbstats')
-                        status[dbstats_database_namespaces] = self.connection[database]['system']['namespaces'].count()
-
-                        # Ensure all strings to prevent JSON parse errors. We typecast on the server
+                        status[dbstats_database] = \
+                            self.connection[database].command('dbstats')
+                        namespaces = (
+                            self.connection[database]['system']['namespaces']
+                        )
+                        status[dbstats_database_namespaces] = (
+                            namespaces.count()
+                        )
+                        # Ensure all strings to prevent JSON parse errors.
+                        # We typecast on the server
                         for key in status[dbstats_database].keys():
 
-                            status[dbstats_database][key] = str(status[dbstats_database][key])
+                            status[dbstats_database][key] = \
+                                str(status[dbstats_database][key])
 
         except Exception:
             import traceback
-            self.checks_logger.error('mongodb_plugin: unable to get MongoDB status - Exception = %s', traceback.format_exc())
+            self.checks_logger.error(
+                'mongodb_plugin: unable to get MongoDB status - '
+                'Exception = %s', traceback.format_exc()
+            )
             return False
 
         self.checks_logger.debug('mongodb_plugin: completed, returning')
@@ -375,36 +571,59 @@ class Mongodb (object):
 
         if (split_version[0] <= 2) and (split_version[1] < 4):
 
-            self.mongo_DB_store['indexCounters']['accessesPS'] = status_output['indexCounters']['btree']['accesses']
-            self.mongo_DB_store['indexCounters']['hitsPS'] = status_output['indexCounters']['btree']['hits']
-            self.mongo_DB_store['indexCounters']['missesPS'] = status_output['indexCounters']['btree']['misses']
-            self.mongo_DB_store['indexCounters']['missRatioPS'] = status_output['indexCounters']['btree']['missRatio']
+            self.mongo_DB_store['indexCounters']['accessesPS'] = \
+                status_output['indexCounters']['btree']['accesses']
+            self.mongo_DB_store['indexCounters']['hitsPS'] = \
+                status_output['indexCounters']['btree']['hits']
+            self.mongo_DB_store['indexCounters']['missesPS'] = \
+                status_output['indexCounters']['btree']['misses']
+            self.mongo_DB_store['indexCounters']['missRatioPS'] = \
+                status_output['indexCounters']['btree']['missRatio']
 
         elif (split_version[0] <= 2) and (split_version[1] >= 4):
 
-            self.mongo_DB_store['indexCounters']['accessesPS'] = status_output['indexCounters']['accesses']
-            self.mongo_DB_store['indexCounters']['hitsPS'] = status_output['indexCounters']['hits']
-            self.mongo_DB_store['indexCounters']['missesPS'] = status_output['indexCounters']['misses']
-            self.mongo_DB_store['indexCounters']['missRatioPS'] = status_output['indexCounters']['missRatio']
+            self.mongo_DB_store['indexCounters']['accessesPS'] = \
+                status_output['indexCounters']['accesses']
+            self.mongo_DB_store['indexCounters']['hitsPS'] = \
+                status_output['indexCounters']['hits']
+            self.mongo_DB_store['indexCounters']['missesPS'] = \
+                status_output['indexCounters']['misses']
+            self.mongo_DB_store['indexCounters']['missRatioPS'] = \
+                status_output['indexCounters']['missRatio']
 
-        if 'globalLock' in status_output and 'totalTime' in status_output['globalLock'] and 'lockTime' in status_output['globalLock']:
+        if ('globalLock' in status_output
+                and 'totalTime' in status_output['globalLock']
+                and 'lockTime' in status_output['globalLock']):
             self.mongo_DB_store['globalLock'] = {}
-            self.mongo_DB_store['globalLock']['totalTime'] = status_output['globalLock']['totalTime']
-            self.mongo_DB_store['globalLock']['lockTime'] = status_output['globalLock']['lockTime']
+            self.mongo_DB_store['globalLock']['totalTime'] = \
+                status_output['globalLock']['totalTime']
+            self.mongo_DB_store['globalLock']['lockTime'] = \
+                status_output['globalLock']['lockTime']
             self.mongo_DB_store['locks'] = status_output['locks']
 
-        self.mongo_DB_store['opCounters']['insertPS'] = status_output['opcounters']['insert']
-        self.mongo_DB_store['opCounters']['queryPS'] = status_output['opcounters']['query']
-        self.mongo_DB_store['opCounters']['updatePS'] = status_output['opcounters']['update']
-        self.mongo_DB_store['opCounters']['deletePS'] = status_output['opcounters']['delete']
-        self.mongo_DB_store['opCounters']['getmorePS'] = status_output['opcounters']['getmore']
-        self.mongo_DB_store['opCounters']['commandPS'] = status_output['opcounters']['command']
+        self.mongo_DB_store['opCounters']['insertPS'] = \
+            status_output['opcounters']['insert']
+        self.mongo_DB_store['opCounters']['queryPS'] = \
+            status_output['opcounters']['query']
+        self.mongo_DB_store['opCounters']['updatePS'] = \
+            status_output['opcounters']['update']
+        self.mongo_DB_store['opCounters']['deletePS'] = \
+            status_output['opcounters']['delete']
+        self.mongo_DB_store['opCounters']['getmorePS'] = \
+            status_output['opcounters']['getmore']
+        self.mongo_DB_store['opCounters']['commandPS'] = \
+            status_output['opcounters']['command']
 
-        self.mongo_DB_store['asserts']['regularPS'] = status_output['asserts']['regular']
-        self.mongo_DB_store['asserts']['warningPS'] = status_output['asserts']['warning']
-        self.mongo_DB_store['asserts']['msgPS'] = status_output['asserts']['msg']
-        self.mongo_DB_store['asserts']['userPS'] = status_output['asserts']['user']
-        self.mongo_DB_store['asserts']['rolloversPS'] = status_output['asserts']['rollovers']
+        self.mongo_DB_store['asserts']['regularPS'] = \
+            status_output['asserts']['regular']
+        self.mongo_DB_store['asserts']['warningPS'] = \
+            status_output['asserts']['warning']
+        self.mongo_DB_store['asserts']['msgPS'] = \
+            status_output['asserts']['msg']
+        self.mongo_DB_store['asserts']['userPS'] = \
+            status_output['asserts']['user']
+        self.mongo_DB_store['asserts']['rolloversPS'] = \
+            status_output['asserts']['rollovers']
 
 if __name__ == "__main__":
     """Standalone test
