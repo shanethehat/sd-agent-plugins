@@ -6,7 +6,7 @@
 # https://github.com/serverdensity/sd-agent-plugins/
 
 #
-# Version: 0.1.0
+# Version: 0.2.0
 #
 
 import collections
@@ -43,18 +43,18 @@ class Mongodb (object):
         self.connection = None
 
     def preliminaries(self):
-        if 'MongoDBServer' not in self.agent_config or self.agent_config['MongoDBServer'] == '':
-            self.checks_logger.debug('getMongoDBStatus: config not set')
+        if 'mongodb_plugin_server' not in self.agent_config or self.agent_config['mongodb_plugin_server'] == '':
+            self.checks_logger.debug('mongodb_plugin: config not set')
             return False
 
-        self.checks_logger.debug('getMongoDBStatus: config set')
+        self.checks_logger.debug('mongodb_plugin: config set')
 
         try:
             import pymongo
             from pymongo import MongoClient
 
         except ImportError:
-            self.checks_logger.error('Unable to import pymongo library')
+            self.checks_logger.error('mongodb_plugin: unable to import pymongo library')
             return False
 
         return True
@@ -62,7 +62,7 @@ class Mongodb (object):
     def get_connection(self):
         try:
             import urlparse
-            parsed = urlparse.urlparse(self.agent_config['MongoDBServer'])
+            parsed = urlparse.urlparse(self.agent_config['mongodb_plugin_server'])
 
             mongo_uri = ''
 
@@ -82,7 +82,7 @@ class Mongodb (object):
 
             else:
 
-                mongo_uri = self.agent_config['MongoDBServer']
+                mongo_uri = self.agent_config['mongodb_plugin_server']
 
             self.checks_logger.debug('-- mongo_uri: %s', mongo_uri)
 
@@ -97,7 +97,7 @@ class Mongodb (object):
         return True
 
     def run(self):
-        self.checks_logger.debug('getMongoDBStatus: start')
+        self.checks_logger.debug('mongodb_plugin: started gathering data')
 
         if not self.preliminaries():
             return False
@@ -113,7 +113,7 @@ class Mongodb (object):
             # Server status
             status_output = db.command('serverStatus', recordStats=0)       # Shorthand for {'serverStatus': 1}
 
-            self.checks_logger.debug('getMongoDBStatus: executed serverStatus')
+            self.checks_logger.debug('mongodb_plugin: executed serverStatus')
 
             # Setup
             status = {}
@@ -122,10 +122,10 @@ class Mongodb (object):
             try:
                 status['version'] = status_output['version']
 
-                self.checks_logger.debug('getMongoDBStatus: version %s', status_output['version'])
+                self.checks_logger.debug('mongodb_plugin: version %s', status_output['version'])
 
             except KeyError, ex:
-                self.checks_logger.error('getMongoDBStatus: version KeyError exception = %s', ex)
+                self.checks_logger.error('mongodb_plugin: version KeyError exception = %s', ex)
                 pass
 
             # Global locks
@@ -135,7 +135,7 @@ class Mongodb (object):
 
                 if (split_version[0] <= 2) and (split_version[1] < 2):
 
-                    self.checks_logger.debug('getMongoDBStatus: globalLock')
+                    self.checks_logger.debug('mongodb_plugin: globalLock')
 
                     status['globalLock_ratio'] = status_output['globalLock']['ratio']
                     status['globalLock_currentQueue_total'] = status_output['globalLock']['currentQueue']['total']
@@ -143,49 +143,49 @@ class Mongodb (object):
                     status['globalLock_currentQueue_writers'] = status_output['globalLock']['currentQueue']['writers']
 
                 else:
-                    self.checks_logger.debug('getMongoDBStatus: version >= 2.2, not getting globalLock status')
+                    self.checks_logger.debug('mongodb_plugin: version >= 2.2, not getting globalLock status')
 
             except KeyError, ex:
-                self.checks_logger.error('getMongoDBStatus: globalLock KeyError exception = %s', ex)
+                self.checks_logger.error('mongodb_plugin: globalLock KeyError exception = %s', ex)
                 pass
 
             # Memory
             try:
-                self.checks_logger.debug('getMongoDBStatus: memory')
+                self.checks_logger.debug('mongodb_plugin: memory')
 
                 status['mem_resident'] = status_output['mem']['resident']
                 status['mem_virtual'] = status_output['mem']['virtual']
                 status['mem_mapped'] = status_output['mem']['mapped']
 
             except KeyError, ex:
-                self.checks_logger.error('getMongoDBStatus: memory KeyError exception = %s', ex)
+                self.checks_logger.error('mongodb_plugin: memory KeyError exception = %s', ex)
                 pass
 
             # Connections
             try:
-                self.checks_logger.debug('getMongoDBStatus: connections')
+                self.checks_logger.debug('mongodb_plugin: connections')
 
                 status['connections_current'] = status_output['connections']['current']
                 status['connections_available'] = status_output['connections']['available']
 
             except KeyError, ex:
-                self.checks_logger.error('getMongoDBStatus: connections KeyError exception = %s', ex)
+                self.checks_logger.error('mongodb_plugin: connections KeyError exception = %s', ex)
                 pass
 
             # Extra info (Linux only)
             try:
-                self.checks_logger.debug('getMongoDBStatus: extra info')
+                self.checks_logger.debug('mongodb_plugin: extra info')
 
                 status['extraInfo_heapUsage'] = status_output['extra_info']['heap_usage_bytes']
                 status['extraInfo_pageFaults'] = status_output['extra_info']['page_faults']
 
             except KeyError, ex:
-                self.checks_logger.debug('getMongoDBStatus: extra info KeyError exception = %s', ex)
+                self.checks_logger.debug('mongodb_plugin: extra info KeyError exception = %s', ex)
                 pass
 
             # Background flushing
             try:
-                self.checks_logger.debug('getMongoDBStatus: backgroundFlushing')
+                self.checks_logger.debug('mongodb_plugin: backgroundFlushing')
 
                 delta = datetime.datetime.utcnow() - status_output['backgroundFlushing']['last_finished']
                 status['backgroundFlushing_secondsSinceLastFlush'] = delta.seconds
@@ -193,17 +193,17 @@ class Mongodb (object):
                 status['backgroundFlushing_flushLengthAvrg'] = status_output['backgroundFlushing']['average_ms']
 
             except KeyError, ex:
-                self.checks_logger.debug('getMongoDBStatus: backgroundFlushing KeyError exception = %s', ex)
+                self.checks_logger.debug('mongodb_plugin: backgroundFlushing KeyError exception = %s', ex)
                 pass
 
             # Per second metric calculations (opcounts and asserts)
             try:
                 if self.mongo_DB_store is None:
-                    self.checks_logger.debug('getMongoDBStatus: per second metrics no cached data, so storing for first time')
+                    self.checks_logger.debug('mongodb_plugin: per second metrics no cached data, so storing for first time')
                     self.set_mongo_db_store(status_output)
 
                 else:
-                    self.checks_logger.debug('getMongoDBStatus: per second metrics cached data exists')
+                    self.checks_logger.debug('mongodb_plugin: per second metrics cached data exists')
 
                     if (split_version[0] <= 2) and (split_version[1] < 4):
 
@@ -225,7 +225,7 @@ class Mongodb (object):
                             status['indexCounters_missesPS'] = float(status_output['indexCounters']['misses'] - self.mongo_DB_store['indexCounters']['missesPS']) / 60
                             status['indexCounters_missRatioPS'] = float(status_output['indexCounters']['missRatio'] - self.mongo_DB_store['indexCounters']['missRatioPS']) / 60
                     else:
-                        self.checks_logger.debug('getMongoDBStatus: per second metrics negative value calculated, mongod likely restarted, so clearing cache')
+                        self.checks_logger.debug('mongodb_plugin: per second metrics negative value calculated, mongod likely restarted, so clearing cache')
 
                     if accesses_ps >= 0:
                         status['opCounters_insertPS'] = float(status_output['opcounters']['insert'] - self.mongo_DB_store['opCounters']['insertPS']) / 60
@@ -259,34 +259,34 @@ class Mongodb (object):
                         status['lock_percent'] = (lock_time + (highest_lock / 1000.0)) / float(total_time) * 100.0
 
             except KeyError, ex:
-                self.checks_logger.error('getMongoDBStatus: per second metrics KeyError exception = %s', ex)
+                self.checks_logger.error('mongodb_plugin: per second metrics KeyError exception = %s', ex)
                 pass
             finally:
                 try:
                     self.set_mongo_db_store(status_output)
                 except:
-                    self.checks_logger.error('getMongoDBStatus: could not save metrics to calculate differentials')
+                    self.checks_logger.error('mongodb_plugin: could not save metrics to calculate differentials')
 
 
 
             # Cursors
             try:
-                self.checks_logger.debug('getMongoDBStatus: cursors')
+                self.checks_logger.debug('mongodb_plugin: cursors')
 
                 status['cursors_totalOpen'] = status_output['cursors']['totalOpen']
 
             except KeyError, ex:
-                self.checks_logger.error('getMongoDBStatus: cursors KeyError exception = %s', ex)
+                self.checks_logger.error('mongodb_plugin: cursors KeyError exception = %s', ex)
                 pass
 
             # Replica set status
             if 'MongoDBReplSet' in self.agent_config and self.agent_config['MongoDBReplSet'] == 'yes':
-                self.checks_logger.debug('getMongoDBStatus: get replset status too')
+                self.checks_logger.debug('mongodb_plugin: get replset status too')
 
                 # isMaster (to get state
                 isMaster = db.command('isMaster')
 
-                self.checks_logger.debug('getMongoDBStatus: executed isMaster')
+                self.checks_logger.debug('mongodb_plugin: executed isMaster')
 
                 status['replSet_setName'] = isMaster['setName']
                 status['replSet_isMaster'] = isMaster['ismaster']
@@ -295,13 +295,13 @@ class Mongodb (object):
                 if 'arbiterOnly' in isMaster:
                     status['replSet_isArbiter'] = isMaster['arbiterOnly']
 
-                self.checks_logger.debug('getMongoDBStatus: finished isMaster')
+                self.checks_logger.debug('mongodb_plugin: finished isMaster')
 
                 # rs.status()
                 db = self.connection['admin']
                 repl_set = db.command('replSetGetStatus')
 
-                self.checks_logger.debug('getMongoDBStatus: executed replSetGetStatus')
+                self.checks_logger.debug('mongodb_plugin: executed replSetGetStatus')
 
                 status['replSet_myState'] = repl_set['myState']
 
@@ -309,7 +309,7 @@ class Mongodb (object):
 
                 for member in repl_set['members']:
 
-                    self.checks_logger.debug('getMongoDBStatus: replSetGetStatus looping %s', member['name'])
+                    self.checks_logger.debug('mongodb_plugin: replSetGetStatus looping %s', member['name'])
 
                     status['replSet']['members'][str(member['_id'])] = {}
 
@@ -336,13 +336,13 @@ class Mongodb (object):
 
             # db.stats()
             if 'MongoDBDBStats' in self.agent_config and self.agent_config['MongoDBDBStats'] == 'yes':
-                self.checks_logger.debug('getMongoDBStatus: db.stats() too')
+                self.checks_logger.debug('mongodb_plugin: db.stats() too')
 
                 for database in self.connection.database_names():
 
                     if database != 'config' and database != 'local' and database != 'admin' and database != 'test':
 
-                        self.checks_logger.debug('getMongoDBStatus: executing db.stats() for %s', database)
+                        self.checks_logger.debug('mongodb_plugin: executing db.stats() for %s', database)
 
                         dbstats_database = 'dbStats_{0}'.format(database)
                         dbstats_database_namespaces = 'dbStats_{0}_namespaces'.format(database)
@@ -357,10 +357,10 @@ class Mongodb (object):
 
         except Exception:
             import traceback
-            self.checks_logger.error('Unable to get MongoDB status - Exception = %s', traceback.format_exc())
+            self.checks_logger.error('mongodb_plugin: unable to get MongoDB status - Exception = %s', traceback.format_exc())
             return False
 
-        self.checks_logger.debug('getMongoDBStatus: completed, returning')
+        self.checks_logger.debug('mongodb_plugin: completed, returning')
 
         flatten_status = flatten(status)
         return flatten_status
@@ -416,12 +416,12 @@ if __name__ == "__main__":
     import json
     import time
     import time
-    host = '192.168.33.10'
+    host = '127.0.0.1'
     port = '27017'
 
     main_agent_config = {
-        'MongoDBServer': "{0}:{1}".format(host, port),
-        #'MongoDBDBStats': 'yes'
+        'mongodb_plugin_server': "{0}:{1}".format(host, port),
+        'mongodb_plugin_dbstats': 'yes'
     }
 
     main_checks_logger = logging.getLogger('MongodbPlugin')
