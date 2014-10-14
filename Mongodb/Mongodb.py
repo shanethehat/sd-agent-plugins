@@ -417,16 +417,18 @@ if __name__ == "__main__":
     host = '127.0.0.1'
     port = '27017'
 
-    main_agent_config = {
-        'mongodb_plugin_server': "{0}:{1}".format(host, port),
-        'mongodb_plugin_dbstats': 'yes',
-        'mongodb_plugin_replset': 'no'
+    raw_agent_config = {
+        'MongoDB': {
+            'mongodb_plugin_server': "{0}:{1}".format(host, port),
+            'mongodb_plugin_dbstats': 'yes',
+            'mongodb_plugin_replset': 'no'
+        }
     }
 
     main_checks_logger = logging.getLogger('MongodbPlugin')
     main_checks_logger.setLevel(logging.DEBUG)
     main_checks_logger.addHandler(logging.StreamHandler(sys.stdout))
-    mongo_check = Mongodb(main_agent_config, main_checks_logger, {})
+    mongo_check = Mongodb({}, main_checks_logger, raw_agent_config)
     while True:
         try:
             result = mongo_check.run()
