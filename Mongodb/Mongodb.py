@@ -1,13 +1,13 @@
-#
-# Server Density Plugin
-# mongodb
-#
-# https://www.serverdensity.com/plugins/mongodb/
-# https://github.com/serverdensity/sd-agent-plugins/
+"""
+Server Density Plugin
+Mongodb
 
-#
-# Version: 1.0.0
-#
+https://www.serverdensity.com/plugins/mongodb/
+https://github.com/serverdensity/sd-agent-plugins/
+
+
+Version: 1.0.0
+"""
 
 import collections
 import datetime
@@ -20,22 +20,26 @@ except ImportError:
     pass
 
 
-# Code snipped taken from
-# http://stackoverflow.com/questions/6027558/\
-# flatten-nested-python-dictionaries-compressing-keys
-def flatten(d, parent_key='', sep='_'):
+def flatten(dictionary, parent_key='', sep='_'):
+    """Code snipped taken from
+       http://stackoverflow.com/questions/6027558/\
+       flatten-nested-python-dictionaries-compressing-keys
+       to "flattern" a nested dict.
+    """
+
     items = []
-    for k, v in d.items():
-        new_key = parent_key + sep + k if parent_key else k
-        if isinstance(v, collections.MutableMapping):
-            items.extend(flatten(v, new_key).items())
+    for key, value in dictionary.items():
+        new_key = parent_key + sep + key if parent_key else key
+        if isinstance(value, collections.MutableMapping):
+            items.extend(flatten(value, new_key).items())
         else:
-            items.append((new_key, v))
+            items.append((new_key, value))
     return dict(items)
 
 
 class Mongodb(object):
-    """sd-agent MongoDB plugin
+    """Plugin class to manage extracting the data from Mongo
+       for the sd-agent.
     """
 
     def __init__(self, agent_config, checks_logger, raw_config):
@@ -508,7 +512,7 @@ class Mongodb(object):
             if ('mongodb_plugin_dbstats' in self.raw_config['MongoDB']
                     and self.raw_config['MongoDB']['mongodb_plugin_dbstats'] ==
                     'yes'):
-                self.checks_logger.debug('mongodb_plugin: db.stats() too')
+                self.checks_logger.debug('mongodb_plugin: get db.stats() too')
 
                 for database in self.connection.database_names():
 
