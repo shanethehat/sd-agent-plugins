@@ -15,7 +15,6 @@ import traceback
 
 
 try:
-    import pymongo
     from pymongo import MongoClient
 except ImportError:
     pass
@@ -35,7 +34,10 @@ def flatten(d, parent_key='', sep='_'):
     return dict(items)
 
 
-class Mongodb (object):
+class Mongodb(object):
+    """sd-agent MongoDB plugin
+    """
+
     def __init__(self, agent_config, checks_logger, raw_config):
         self.agent_config = agent_config
         self.checks_logger = checks_logger
@@ -53,7 +55,6 @@ class Mongodb (object):
         self.checks_logger.debug('mongodb_plugin: config set')
 
         try:
-            import pymongo
             from pymongo import MongoClient
 
         except ImportError:
@@ -172,7 +173,6 @@ class Mongodb (object):
             except KeyError, ex:
                 self.checks_logger.error(
                     'mongodb_plugin: globalLock KeyError exception = %s', ex)
-                pass
 
             # Memory
             try:
@@ -185,7 +185,6 @@ class Mongodb (object):
             except KeyError, ex:
                 self.checks_logger.error(
                     'mongodb_plugin: memory KeyError exception = %s', ex)
-                pass
 
             # Connections
             try:
@@ -199,7 +198,6 @@ class Mongodb (object):
             except KeyError, ex:
                 self.checks_logger.error(
                     'mongodb_plugin: connections KeyError exception = %s', ex)
-                pass
 
             # Extra info (Linux only)
             try:
@@ -213,7 +211,6 @@ class Mongodb (object):
             except KeyError, ex:
                 self.checks_logger.debug(
                     'mongodb_plugin: extra info KeyError exception = %s', ex)
-                pass
 
             # Background flushing
             try:
@@ -407,7 +404,6 @@ class Mongodb (object):
                 self.checks_logger.error(
                     'mongodb_plugin: per second metrics KeyError exception = '
                     '%s', ex)
-                pass
             finally:
                 try:
                     self.set_mongo_db_store(status_output)
@@ -426,7 +422,6 @@ class Mongodb (object):
             except KeyError, ex:
                 self.checks_logger.error(
                     'mongodb_plugin: cursors KeyError exception = %s', ex)
-                pass
 
             # Replica set status
             if (
@@ -547,7 +542,6 @@ class Mongodb (object):
                                 str(status[dbstats_database][key])
 
         except Exception:
-            import traceback
             self.checks_logger.error(
                 'mongodb_plugin: unable to get MongoDB status - '
                 'Exception = %s', traceback.format_exc()
@@ -628,10 +622,10 @@ class Mongodb (object):
 if __name__ == "__main__":
     """Standalone test
     """
+
     import logging
     import sys
     import json
-    import time
     import time
     host = '127.0.0.1'
     port = '27017'
