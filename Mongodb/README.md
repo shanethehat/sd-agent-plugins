@@ -9,10 +9,11 @@ Requirements
 
 Configuration
 ---
-1. Set your mongoDB host and port, by default the plugin assumes 127.0.0.1 and 27017. To do so use the agent configuration entry: mongodb_plugin_server.
-Example: 127.0.0.1:27017
-2. Define if the individual database stats are to be collected with the agent configuration entry mongodb_plugin_dbstats with value "yes" 
-3. Restart the agent.
+1. This plugin uses a section of the configuration file called ```MongoDB```. All the configuration entries should be in it for the plugin to read them.
+2. Set your mongoDB host and port, by default the plugin assumes 127.0.0.1 and 27017. To do so use the agent configuration entry: mongodb_plugin_server.
+Example: ```mongodb_plugin_server: 127.0.0.1:27017``
+3. Define if the individual database stats are to be collected with the agent configuration adding the entry ```mongodb_plugin_dbstats: yes```
+4. Restart the agent.
 
 Parameters
 ---
@@ -20,6 +21,7 @@ All parameters must be in the MongoDB section of the configuration file
 * `mongodb_plugin_server` - MongoDB server host and port in the format host:port
 * `mongodb_plugin_dbstats` - Define if the individual database metrics are to be collected. The metrics will be collected if the value is "yes"
 * `mongodb_plugin_replset` - Replica set configuration is collected if the value is "yes"
+
 Example:
 
 ```
