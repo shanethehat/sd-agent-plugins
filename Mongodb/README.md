@@ -18,7 +18,7 @@ Once the shell appears enter:
 import pymongo
 pymongo.version
 ```
-When you hit return, if the command completes and you get no errors then you have the module already installed and can skip to step 2 below.
+When you hit return, if the command completes and you get no errors then you have the module already installed and can skip to step 3 below.
 Otherwise you'll get the following error:
 ```
 ImportError: No module named pymongo
@@ -41,15 +41,15 @@ sudo python setup.py install
 ```
 (pip is recommended if it's available)
 
-3. Copy the Mongodb.py file into the plugins directory
+3. Download the [Mongodb.py](Mongodb.py) plugin file into your [Server Density agent plugin directory](/README.md).
 
-4. Configure the plugin with your server settings
+4. Open the agent config file and create a new config section - see below for details.
 
 5. Restart the agent
 
 Configuration
 ---
-1. This plugin uses a section of the configuration file called ```MongoDB```. All the configuration entries should be in it for the plugin to read them.
+1. This plugin uses a new section of the configuration file called ```MongoDB``` (there may be an existing section which you can ignore - the old section will be removed in a future agent release). All the configuration entries should be in it for the plugin to read them.
 2. Set your mongoDB host and port, by default the plugin assumes 127.0.0.1 and 27017. To do so use the agent configuration entry: mongodb_plugin_server.
 Example: ```mongodb_plugin_server: 127.0.0.1:27017``
 3. Define if the individual database stats are to be collected with the agent configuration adding the entry ```mongodb_plugin_dbstats: yes```
