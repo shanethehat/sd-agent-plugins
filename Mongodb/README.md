@@ -9,11 +9,13 @@ Requirements
 
 Configuration
 ---
-1. [Configure the MongoDB monitoring for the agent](https://support.serverdensity.com/hc/en-us/articles/201011838-MongoDB-monitoring-Linux-Mac-and-FreeBSD)
-2. Download the [Mongodb.py](Mongodb.py) plugin file into your [Server Density agent plugin directory](/README.md).
-3. Restart the agent.
+1. This plugin uses a section of the configuration file called ```MongoDB```. All the configuration entries should be in it for the plugin to read them.
+2. Set your mongoDB host and port, by default the plugin assumes 127.0.0.1 and 27017. To do so use the agent configuration entry: mongodb_plugin_server.
+Example: ```mongodb_plugin_server: 127.0.0.1:27017``
+3. Define if the individual database stats are to be collected with the agent configuration adding the entry ```mongodb_plugin_dbstats: yes```
+4. Restart the agent.
 
-Config Parameters
+Parameters
 ---
 All parameters must be in the MongoDB section of the configuration file
 * `mongodb_plugin_server` - MongoDB server host and port in the format host:port
