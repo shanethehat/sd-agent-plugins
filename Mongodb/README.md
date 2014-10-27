@@ -1,11 +1,51 @@
 MongoDB Plugin
 ===
 
-This plugin gets stats from a [MongoDB server](http://www.mongodb.com) 
+This plugin gets stats from a [MongoDB server](http://www.mongodb.com)
 
 Requirements
 ---
-* Pymongo
+* pymongo
+
+Installation
+---
+1. Check if you have pymongo installed. Run:
+```
+python
+```
+Once the shell appears enter:
+```
+import pymongo
+pymongo.version
+```
+When you hit return, if the command completes and you get no errors then you have the module already installed and can skip to step 2 below.
+Otherwise you'll get the following error:
+```
+ImportError: No module named pymongo
+```
+Also check the version number so you have the latest version with all updates. Older versions do not support some features / syntax so we recommend at least version 2.1 and require at least version 1.8.
+
+2. Install pymongo:
+```
+pip install pymongo
+```
+or
+```
+easy_install pymongo
+```
+or
+```
+git clone git://github.com/mongodb/mongo-python-driver.git pymongo
+cd pymongo
+sudo python setup.py install
+```
+(pip is recommended if it's available)
+
+3. Copy the Mongodb.py file into the plugins directory
+
+4. Configure the plugin with your server settings
+
+5. Restart the agent
 
 Configuration
 ---
@@ -15,10 +55,17 @@ Example: ```mongodb_plugin_server: 127.0.0.1:27017``
 3. Define if the individual database stats are to be collected with the agent configuration adding the entry ```mongodb_plugin_dbstats: yes```
 4. Restart the agent.
 
-Parameters
+Config Parameters
 ---
 All parameters must be in the MongoDB section of the configuration file
-* `mongodb_plugin_server` - MongoDB server host and port in the format host:port
+* `mongodb_plugin_server` - MongoDB server host and port in the format:
+```
+host:port
+```
+or
+```
+mongodb://user:pass@host:port
+```
 * `mongodb_plugin_dbstats` - Define if the individual database metrics are to be collected. The metrics will be collected if the value is "yes"
 * `mongodb_plugin_replset` - Replica set configuration is collected if the value is "yes"
 
