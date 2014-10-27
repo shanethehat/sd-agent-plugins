@@ -33,6 +33,8 @@ mongodb_plugin_replset: no
 
 Recommended alerts
 ---
+* `replSet_isMaster` - If you expect this server to be master all the time then set an alert on this for equal to `false`. This value is `true` when this server is master.
+* `replSet_myState` - This is a numerical value of the [current state of this server based on this range of states](http://docs.mongodb.org/manual/reference/replica-states/).
 * `lock_percent` - If this value is very high you may have be experiencing capacity problems with your server
 * `connections_current` - This value shouldn't grow too much (ideally it should be under a few thousand connections in busy applications)
 * `connections_available` - This value should never get to 0
