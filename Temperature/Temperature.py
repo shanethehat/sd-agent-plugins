@@ -18,6 +18,18 @@ import time
 
 
 class Temperature(object):
+    """SD Plugin for reading available temperature data from the machine.
+
+    We need tools to be installed to complete fetching the temperatues:
+
+    * lm-sensors - http://www.lm-sensors.org/
+    * smartctl - http://www.smartmontools.org/
+
+    Ubuntu Packages:
+    * lm-sensors - http://packages.ubuntu.com/trusty/lm-sensors
+    * smartctl - http://packages.ubuntu.com/trusty/smartmontools
+
+    """
 
     def __init__(self, agent_config, checks_logger, raw_config):
         self.agent_config = agent_config
@@ -25,7 +37,9 @@ class Temperature(object):
         self.raw_config = raw_config
         self.version = platform.python_version_tuple()
 
-        self.temperature_scale = self.raw_config['Temperature']['scale']
+        # Celsiusis our default
+        self.temperature_scale = self.raw_config['Temperature']\
+            .get('scale', 'c')
 
     def run(self):
 
@@ -42,6 +56,8 @@ class Temperature(object):
         return data
 
     def process_linux_pi(self):
+        """Extract from the onboard temperature sensor for a Pi
+        """
         data = {}
 
         temp_sensor = '/sys/class/thermal/thermal_zone0/temp'
@@ -56,6 +72,7 @@ class Temperature(object):
                     exception.message))
 
         try:
+            # / 1000 as the value returned is very precise
             data['Core 0'] = self.convert_reading(float(int(temp) / 1000.0))
         except Exception as exception:
             self.mainLogger.error(
@@ -64,6 +81,8 @@ class Temperature(object):
         return data
 
     def process_linux(self):
+        """Do the right thing for a linux server.
+        """
         data = {}
 
         for adapter in self.raw_config['Temperature']['adapters'].split(','):
@@ -103,6 +122,9 @@ class Temperature(object):
                                               temp_line.split(':')[0])]\
                             = reading
 
+            if 'disks' in self.raw_config['Temperature']:
+                data = self.read_disk_temperatures(data)
+
         return data
 
     def convert_reading(self, temperature):
@@ -117,10 +139,56 @@ class Temperature(object):
             return temperature
 
     def convert_celsius_to_kelvin(self, temperature_in_celsius):
+        """Convert Celsius to Kelvin, because why not?"""
         return float(temperature_in_celsius) + 273.15
 
     def convert_celsius_to_fahrenheit(self, temperature_in_celsius):
+        """Convert Celsius to Fahrenheit"""
         return float(temperature_in_celsius * 9) / 5 + 32
+
+    def read_disk_temperatures(self, data):
+        """ Use smartctl to read the temperature from the available disks.
+        """
+        # check if we can read the disks
+        # also check if the config knows which disks or just all of them
+        if 'disks' in self.raw_config['Temperature'] and\
+           self.raw_config['Temperature']['disks'] != 'yes':
+            disks = self.raw_config['Temperature']['disks'].split(',')
+        else:
+            try:
+                import glob
+                disks = glob.glob('/dev/sd[a-z]')
+            except ImportError as exception:
+                self.mainLogger.error('Unable to import "glob" Python module')
+                return data
+
+        for disk in disks:
+            proc = subprocess.Popen(['sudo',
+                                     'smartctl',
+                                     '--all',
+                                     disk,
+                                     '-s',
+                                     'on'],
+                                    stdout=subprocess.PIPE, close_fds=True)
+            output = proc.communicate()[0]
+            for line in output.split("\n"):
+                split = line.split()
+                try:
+                    if 'Temperature_Celsius' in split:
+                        if self.temperature_scale == 'f':
+                            data[disk] =\
+                                self.convert_celsius_to_fahrenheit(split[9])
+                        elif self.temperature_scale == 'k':
+                            data[disk] =\
+                                self.convert_celsius_to_kelvin(split[9])
+                        else:
+                            data[disk] = split[9]
+                except Exception as exception:
+                    self.mainLogger.error(
+                        'Unable to extract temperature from smartctl.'\
+                        + 'Error: {0}'\
+                        .format(exception.message))
+        return data
 
 
 if __name__ == '__main__':
@@ -132,7 +200,9 @@ if __name__ == '__main__':
             'scale': 'c',
             'cpus': 'yes',
             'other': 'yes',
-            'adapters': 'f75375-i2c-0-2d,f75375-i2c-0-2f'
+            'adapters': 'f75375-i2c-0-2d',
+            'disks': 'yes'
+            #'disks': '/dev/sdc,/dev/sdd'
         }
     }
 
