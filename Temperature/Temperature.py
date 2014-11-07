@@ -37,7 +37,7 @@ class Temperature(object):
         self.raw_config = raw_config
         self.version = platform.python_version_tuple()
 
-        # Celsiusis our default
+        # Celsius our default
         self.temperature_scale = self.raw_config['Temperature']\
             .get('scale', 'c')
 
