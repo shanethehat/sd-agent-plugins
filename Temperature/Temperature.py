@@ -185,8 +185,8 @@ class Temperature(object):
                             data[disk] = split[9]
                 except Exception as exception:
                     self.mainLogger.error(
-                        'Unable to extract temperature from smartctl.'\
-                        + 'Error: {0}'\
+                        'Unable to extract temperature from smartctl.'
+                        + 'Error: {0}'
                         .format(exception.message))
         return data
 
@@ -201,8 +201,7 @@ if __name__ == '__main__':
             'cpus': 'yes',
             'other': 'yes',
             'adapters': 'f75375-i2c-0-2d',
-            'disks': 'yes'
-            #'disks': '/dev/sdc,/dev/sdd'
+            'disks': 'yes'  # 'disks': '/dev/sdc,/dev/sdd'
         }
     }
 
