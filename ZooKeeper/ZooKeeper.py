@@ -23,35 +23,34 @@ class ZooKeeper(object):
         self.checks_logger = checks_logger
         self.raw_config = raw_config
         self.zookeeper_commands = [
-			'conf',
-			'ruok',
-			'srvr',
-		]
+            'conf',
+            'ruok',
+            'srvr',
+        ]
 
     def run(self):
         data = {}
         self.checks_logger.debug('ZooKeeper_plugin: started gathering data')
 
         for command in self.zookeeper_commands:
-           s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-           s.connect(
-               (self.raw_config['ZooKeeper']['host'], 
-                int(self.raw_config['ZooKeeper']['port']))
-           )
-           s.sendall(command)
-           reply = s.recv(1024)
-           if command == 'conf':
-               data = self.convert_conf(data, reply)
-           elif command == 'ruok':
-               data = self.convert_ruok(data, reply)
-           elif command == 'srvr':
-               data = self.convert_srvr(data, reply)
-           
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s.connect(
+                (self.raw_config['ZooKeeper']['host'],
+                 int(self.raw_config['ZooKeeper']['port']))
+            )
+            s.sendall(command)
+            reply = s.recv(1024)
+            if command == 'conf':
+                data = self.convert_conf(data, reply)
+            elif command == 'ruok':
+                data = self.convert_ruok(data, reply)
+            elif command == 'srvr':
+                data = self.convert_srvr(data, reply)
+
         self.checks_logger.debug('ZooKeeper_plugin: completed, returning')
 
         return data
 
-  
     def convert_conf(self, data, reply):
         """
         clientPort=2181
@@ -71,7 +70,7 @@ class ZooKeeper(object):
             if key in ['dataDir', 'dataLogDir']:
                 continue
             data[key] = int(value)
-        return data 
+        return data
 
     def convert_ruok(self, data, reply):
         if reply == 'imok':
