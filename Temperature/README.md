@@ -8,6 +8,15 @@ For hard disk temperature tests [smartctl](http://www.smartmontools.org/) is req
 Setup
 ---
 
+To to check hard disk temperatures using smartctl the plugin needs to execute the following
+using sudo:
+
+`sudo smartctl --all /dev/DEVICE -s on`
+
+Depending on how you are running the agent you maybe need to give the sd-agent more permissions.
+[plugins requiring sudo](https://support.serverdensity.com/hc/en-us/articles/201253683-Plugins-requiring-sudo) 
+has more information.
+
 Linux
 ---
 1. You must have installed [lm-sensors](http://www.lm-sensors.org/).
@@ -37,5 +46,6 @@ scale: c # c(elsius) f(ahrenheit) k(elvin)
 cpus: yes # report CPU temperature values
 other: no # report other temperature stats from the command "sensors"
 adapters: f75375-i2c-0-2d # specify adapters to report on
-disks: '/dev/sda,/dev/hda' # set the disks, leave blank to test all disks, 'no' disable disk checks
+# the following requires sudo access. [plugins requiring sudo](https://support.serverdensity.com/hc/en-us/articles/201253683-Plugins-requiring-sudo)
+disks: '/dev/sda,/dev/hda' #  set the disks, leave blank to test all disks, 'no' disable disk checks
 ```
