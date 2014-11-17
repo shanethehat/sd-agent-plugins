@@ -46,6 +46,6 @@ scale: c # c(elsius) f(ahrenheit) k(elvin)
 cpus: yes # report CPU temperature values
 other: no # report other temperature stats from the command "sensors"
 adapters: f75375-i2c-0-2d # specify adapters to report on
-# the following requires sudo access. [plugins requiring sudo](https://support.serverdensity.com/hc/en-us/articles/201253683-Plugins-requiring-sudo)
+# the following requires sudo access - https://support.serverdensity.com/hc/en-us/articles/201253683-Plugins-requiring-sudo
 disks: '/dev/sda,/dev/hda' #  set the disks, leave blank to test all disks, 'no' disable disk checks
 ```
