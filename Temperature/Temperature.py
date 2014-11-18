@@ -67,7 +67,7 @@ class Temperature(object):
                 temp = temp_device.read()
             temp_device.close()
         except Exception as exception:
-            self.mainLogger.error(
+            self.checks_logger.error(
                 'Failed to open file to read temperature: {0}'.format(
                     exception.message))
 
@@ -75,7 +75,7 @@ class Temperature(object):
             # / 1000 as the value returned is very precise
             data['Core 0'] = self.convert_reading(float(int(temp) / 1000.0))
         except Exception as exception:
-            self.mainLogger.error(
+            self.checks_logger.error(
                 'Failed to calculate temperature: {0}'.format(
                     exception.message))
         return data
@@ -159,7 +159,7 @@ class Temperature(object):
                 import glob
                 disks = glob.glob('/dev/sd[a-z]')
             except ImportError as exception:
-                self.mainLogger.error('Unable to import "glob" Python module')
+                self.checks_logger.error('Unable to import "glob" Python module')
                 return data
 
         for disk in disks:
@@ -184,7 +184,7 @@ class Temperature(object):
                         else:
                             data[disk] = split[9]
                 except Exception as exception:
-                    self.mainLogger.error(
+                    self.checks_logger.error(
                         'Unable to extract temperature from smartctl.'
                         + 'Error: {0}'
                         .format(exception.message))

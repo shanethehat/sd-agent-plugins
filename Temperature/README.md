@@ -14,7 +14,7 @@ using sudo:
 `sudo smartctl --all /dev/DEVICE -s on`
 
 Depending on how you are running the agent you maybe need to give the sd-agent more permissions.
-[plugins requiring sudo](https://support.serverdensity.com/hc/en-us/articles/201253683-Plugins-requiring-sudo) 
+[plugins requiring sudo](https://support.serverdensity.com/hc/en-us/articles/201253683-Plugins-requiring-sudo)
 has more information.
 
 Linux
@@ -42,10 +42,15 @@ Configuration
 ---
 ```
 [Temperature]
-scale: c # c(elsius) f(ahrenheit) k(elvin)
-cpus: yes # report CPU temperature values
-other: no # report other temperature stats from the command "sensors"
-adapters: f75375-i2c-0-2d # specify adapters to report on
+# c(elsius) f(ahrenheit) k(elvin)
+scale: c
+# report CPU temperature values
+cpus: yes
+# report other temperature stats from the command "sensors"
+other: no
+# specify adapters to report on, you will need to change these
+adapters: f75375-i2c-0-2d
 # the following requires sudo access - https://support.serverdensity.com/hc/en-us/articles/201253683-Plugins-requiring-sudo
-disks: '/dev/sda,/dev/hda' #  set the disks, leave blank to test all disks, 'no' disable disk checks
+# set the disks, leave blank to test all disks, 'no' disable disk checks
+disks: '/dev/sda,/dev/hda'
 ```
