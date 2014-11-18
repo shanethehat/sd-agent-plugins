@@ -120,7 +120,7 @@ class Temperature(object):
                             .split('(')[0]
                         data['{0} {1}'.format(adapter,
                                               temp_line.split(':')[0])]\
-                            = reading
+                            = reading.replace('C', '')
 
             if 'disks' in self.raw_config['Temperature']:
                 data = self.read_disk_temperatures(data)
