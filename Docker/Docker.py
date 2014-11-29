@@ -89,17 +89,23 @@ class Docker(object):
 
         names = {}
 
-        proc = subprocess.Popen(
-            ['sudo', 'docker', 'ps', '-l', '--no-trunc'],
-            stdout=subprocess.PIPE,
-            close_fds=True)
-        docker_ps = proc.communicate()[0]
+        try:
+            proc = subprocess.Popen(
+                ['sudo', 'docker', 'ps', '-l', '--no-trunc'],
+                stdout=subprocess.PIPE,
+                close_fds=True)
+            docker_ps = proc.communicate()[0]
 
-        for line in docker_ps.split('\n'):
-            if not line or line.startswith('CONTAINER ID'):
-                continue
-            line = line.split()
-            names[line[0]] = line[-1]
+            for line in docker_ps.split('\n'):
+                if not line or line.startswith('CONTAINER ID'):
+                    continue
+                line = line.split()
+                names[line[0]] = line[-1]
+
+        except Exception as exception:
+            self.checks_logger.error(
+                'Failed to generate list of containers. Error: {0}'.format(
+                    exception.message))
 
         return names
 
