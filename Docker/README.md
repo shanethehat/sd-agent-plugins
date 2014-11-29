@@ -28,7 +28,7 @@ and their meaning and possible impact on the hosting server.
 
 * `memory-oom_control` - Changes to 1 if OOM is active
 * `memory-rss` - Amount of memory not used by stacks, heaps etc. Slow increase could mean a memory leak.
-* `blkio.io_queued` - I/O operations currently queued. High numbers mean high amount of disk access.
+* `blkio-io_queued` - I/O operations currently queued. High numbers mean high amount of disk access.
 
 Configuration
 ---
