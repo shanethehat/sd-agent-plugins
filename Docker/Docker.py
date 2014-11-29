@@ -63,6 +63,11 @@ class Docker(object):
                             continue
 
                         name, value = read.split()
+
+                        # this is a huge value we don't need to graph
+                        if name == 'hierarchical_memory_limit':
+                            continue
+
                         data['{0}-{1}-{2}'.format(
                             container_name,
                             stat_type,
