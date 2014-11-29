@@ -25,54 +25,58 @@ class Docker(object):
         self.checks_logger = checks_logger
         self.raw_config = raw_config
         self.version = platform.python_version_tuple()
-        self.docker_path = [
-            '/sys/fs/cgroup/memory/docker',
-            '/sys/fs/cgroup/cpu/docker',
-        ]
+
+        # stats we are interested in
+        self.docker_path = {
+            '/sys/fs/cgroup/memory/docker/{0}/memory.stat': 'memory',
+            '/sys/fs/cgroup/memory/docker/{0}/memory.oom_control': 'memory',
+            '/sys/fs/cgroup/cpu/docker/{0}/cpu.stat': 'cpu',
+            '/sys/fs/cgroup/cpu/docker/{0}/blkio.sectors': 'blkio',
+            '/sys/fs/cgroup/cpu/docker/{0}/blkio.io_service_bytes': 'blkio',
+            '/sys/fs/cgroup/cpu/docker/{0}/blkio.io_serviced': 'blkio',
+            '/sys/fs/cgroup/blkio/docker/{0}/blkio.io_queued': 'blkio',
+        }
 
     def run(self):
 
         data = {}
 
         container_id = None
-        
+
         names = self.extract_container_names()
         print names
 
         for container_id, container_name in names.iteritems():
-            for path in self.docker_path:
-                for dir_name in os.listdir(path):
-                    try:
-                        container_dir = os.path.join(path, dir_name)
-                        if not os.path.isdir(container_dir):
+            print container_id
+
+            for path, stat_type in self.docker_path.iteritems():
+                try:
+                    stat_file = path.format(container_id)
+                    if not os.path.isfile(stat_file):
+                        continue
+
+                    reading = None
+                    with open(stat_file) as temp_file:
+                        reading = temp_file.read()
+                        temp_file.close()
+                    if not reading:
+                        continue
+
+                    reading = reading.split('\n')
+                    for read in reading:
+                        if not read:
                             continue
-                        for file_name in os.listdir(container_dir):
-                            try:
-                                with open(os.path.join(container_dir, file_name), 'r') as temp_file:
-                                    reading = temp_file.read()
-                                temp_file.close()
-                                reading = reading.split('\n')
-                                # deal multiple values in a file
-                                if len(reading) > 3:
-                                    for read in reading:
-                                        if read:
-                                            split_reading = read.split()
-                                            print split_reading
-                                            if '=' in split_reading[0]:
-                                                name, reading = split_reading[0].split('=')
-                                            else:
-                                                name, reading = split_reading[0], split_reading[1]
-                                            data[container_name + '-' + name] = reading
-                                else:
-                                    print os.path.join(container_dir, file_name)
-                                    data[container_name + '-' + file_name] = reading[0]
-                            except Exception as exception:
-                                print exception
-                        
-                    except Exception as exception:
-                        self.mainLogger.error(
-                            'Failed to open file to read temperature: {0}'.format(
-                            exception.message))
+
+                        name, value = read.split()
+                        data['{0}-{1}-{2}'.format(
+                            container_name,
+                            stat_type,
+                            name.lower())] = value
+
+                except Exception as exception:
+                    self.checks_logger.error(
+                        'Failed to open file to read stat: {0}'.format(
+                        exception.message))
 
         return data
 
@@ -80,13 +84,13 @@ class Docker(object):
         """ Iterate over the output of:
             sudo docker ps -l
             CONTAINER ID IMAGE        COMMAND   CREATED      STATUS      PORTS NAMES
-            491f2fe3b18f ubuntu:14.04 /bin/bash 40 hours ago Up 40 hours       focused_feynman
+            491f2fe3b18f ubuntu:14.04 /bin/bash 40 hours ago Up 40 hours focused_feynman
         """
 
         names = {}
 
         proc = subprocess.Popen(
-                    ['sudo', 'docker', 'ps', '-l'],
+                    ['sudo', 'docker', 'ps', '-l', '--no-trunc'],
                     stdout=subprocess.PIPE,
                     close_fds=True)
         docker_ps = proc.communicate()[0]
@@ -98,7 +102,7 @@ class Docker(object):
             names[line[0]] = line[-1]
 
         return names
-                       
+
 
 
 if __name__ == '__main__':
@@ -107,7 +111,6 @@ if __name__ == '__main__':
 
     raw_agent_config = {
         'Docker': {
-            'container_name': 'focused_feynman',
         }
     }
 
