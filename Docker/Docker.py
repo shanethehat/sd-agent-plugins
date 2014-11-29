@@ -41,14 +41,9 @@ class Docker(object):
 
         data = {}
 
-        container_id = None
-
         names = self.extract_container_names()
-        print names
 
         for container_id, container_name in names.iteritems():
-            print container_id
-
             for path, stat_type in self.docker_path.iteritems():
                 try:
                     stat_file = path.format(container_id)
@@ -76,23 +71,23 @@ class Docker(object):
                 except Exception as exception:
                     self.checks_logger.error(
                         'Failed to open file to read stat: {0}'.format(
-                        exception.message))
+                            exception.message))
 
         return data
 
     def extract_container_names(self):
         """ Iterate over the output of:
             sudo docker ps -l
-            CONTAINER ID IMAGE        COMMAND   CREATED      STATUS      PORTS NAMES
-            491f2fe3b18f ubuntu:14.04 /bin/bash 40 hours ago Up 40 hours focused_feynman
+            CONTAINER ID IMAGE  COMMAND   CREATED  STATUS      PORTS NAMES
+            491f2fe3b18f ubuntu /bin/bash 40 hours Up 40 hours focused_feynman
         """
 
         names = {}
 
         proc = subprocess.Popen(
-                    ['sudo', 'docker', 'ps', '-l', '--no-trunc'],
-                    stdout=subprocess.PIPE,
-                    close_fds=True)
+            ['sudo', 'docker', 'ps', '-l', '--no-trunc'],
+            stdout=subprocess.PIPE,
+            close_fds=True)
         docker_ps = proc.communicate()[0]
 
         for line in docker_ps.split('\n'):
@@ -102,7 +97,6 @@ class Docker(object):
             names[line[0]] = line[-1]
 
         return names
-
 
 
 if __name__ == '__main__':
