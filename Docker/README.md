@@ -26,7 +26,7 @@ Below are three possible alerts that you might want to use. A lot of data is ret
 [Docker Run Metrics](https://docs.docker.com/articles/runmetrics/). This page has a detailed explaination of the stats we collect
 and their meaning and possible impact on the hosting server.
 
-* `memory-oom_control` - Changes to 1 if OOM is active
+* `memory-oom_control` - Changes to 1 if Out Of Memory Killer is active meaning processes will start to be killed.
 * `memory-rss` - Amount of memory not used by stacks, heaps etc. Slow increase could mean a memory leak.
 * `blkio-io_queued` - I/O operations currently queued. High numbers mean high amount of disk access.
 
