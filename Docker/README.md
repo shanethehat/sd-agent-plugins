@@ -9,8 +9,7 @@ This plugin uses the output from `sudo docker ps -l --no-trunc` to collect data 
 
 Metrics
 ---
-Any container on this wil be reported using available data from `/sys/fs/cgroup/`. The following list of files contain
-is the statistics reported by the agent:
+Any container on this wil be reported using available data from `/sys/fs/cgroup/`. The following list of files contain the statistics reported by the agent:
 
 * /sys/fs/cgroup/memory/docker/{CONTAINER_ID}/memory.stat
 * /sys/fs/cgroup/memory/docker/{CONTAINER_ID}/memory.oom_control
