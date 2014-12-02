@@ -49,8 +49,8 @@ class Zombies(object):
                             brains['zombies'] = zombies_raw.split()[0]
                     except Exception as exception:
                         self.checks_logger.error(
-                            'Failed fetching zombie stat from "top" output'.format(
-                            exception.message))
+                            'Failed fetching zombie stat from "top" output'
+                            .format(exception.message))
 
         except Exception as exception:
             self.checks_logger.error(
