@@ -1,6 +1,6 @@
 Zombies Monitor
 ===
-This plugin is for reporting number of "zombie" processes as report by the command line tool "top".
+This plugin is for reporting number of "zombie" processes as reported by the command line tool "top".
 
 Setup
 ---
