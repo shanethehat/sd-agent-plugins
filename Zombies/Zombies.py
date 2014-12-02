@@ -1,8 +1,8 @@
 """
   Server Density Plugin
-  Temperature measurements
+  Zombies measurements
 
-  https://www.serverdensity.com/plugins/temperatures/
+  https://www.serverdensity.com/plugins/zombies/
   https://github.com/serverdensity/sd-agent-plugins/
 
 
@@ -11,7 +11,6 @@
 
 import json
 import logging
-import os
 import platform
 import sys
 import subprocess
@@ -30,32 +29,37 @@ class Zombies(object):
 
         brains = {}
 
-        try:
-            proc = subprocess.Popen(
-                ['top', '-b', '-n', '1'],
-                stdout=subprocess.PIPE,
-                close_fds=True)
+        if platform.system() == 'Linux':
 
-            top_output = proc.communicate()[0]
+            try:
+                proc = subprocess.Popen(
+                    ['top', '-b', '-n', '1'],
+                    stdout=subprocess.PIPE,
+                    close_fds=True)
 
-            for line in top_output.split('\n'):
-                if not line:
-                    continue
+                top_output = proc.communicate()[0]
 
-                if line.startswith('Tasks') and line.endswith('zombie'):
-                    try:
-                        zombies_raw = line.split(',')[-1]
-                        if 'zombie' in zombies_raw:
-                            brains['zombies'] = zombies_raw.split()[0]
-                    except Exception as exception:
-                        self.checks_logger.error(
-                            'Failed fetching zombie stat from "top" output'
-                            .format(exception.message))
+                for line in top_output.split('\n'):
+                    if not line:
+                        continue
 
-        except Exception as exception:
+                    if line.startswith('Tasks') and line.endswith('zombie'):
+                        try:
+                            zombies_raw = line.split(',')[-1]
+                            if 'zombie' in zombies_raw:
+                                brains['zombies'] = zombies_raw.split()[0]
+                        except Exception as exception:
+                            self.checks_logger.error(
+                                'Failed fetching zombie stat from "top" output'
+                                .format(exception.message))
+
+            except Exception as exception:
+                self.checks_logger.error(
+                    'Failed to generate list of containers. Error: {0}'.format(
+                        exception.message))
+        else:
             self.checks_logger.error(
-                'Failed to generate list of containers. Error: {0}'.format(
-                    exception.message))
+                'Plugin currently only available on Linux.')
 
         return brains
 
