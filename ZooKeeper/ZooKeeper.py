@@ -26,6 +26,7 @@ class ZooKeeper(object):
             'conf',
             'ruok',
             'srvr',
+            'mntr'
         ]
 
     def run(self):
@@ -33,19 +34,33 @@ class ZooKeeper(object):
         self.checks_logger.debug('ZooKeeper_plugin: started gathering data')
 
         for command in self.zookeeper_commands:
-            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            s.connect(
-                (self.raw_config['ZooKeeper']['host'],
-                 int(self.raw_config['ZooKeeper']['port']))
-            )
-            s.sendall(command)
-            reply = s.recv(1024)
-            if command == 'conf':
-                data = self.convert_conf(data, reply)
-            elif command == 'ruok':
-                data = self.convert_ruok(data, reply)
-            elif command == 'srvr':
-                data = self.convert_srvr(data, reply)
+
+            try:
+                s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+                # set a timeout for socket operation
+                s.settimeout(4)
+
+                s.connect(
+                    (self.raw_config['ZooKeeper']['host'],
+                     int(self.raw_config['ZooKeeper']['port']))
+                )
+                s.sendall(command)
+                reply = s.recv(1024)
+                if command == 'conf':
+                    data = self.convert_conf(data, reply)
+                elif command == 'ruok':
+                    data = self.convert_ruok(data, reply)
+                elif command == 'srvr':
+                    data = self.convert_srvr(data, reply)
+                elif command == 'mntr':
+                    data = self.convert_mntr(data, reply)
+
+                del s
+            except Exception as exception:
+                self.checks_logger.error(
+                    'ZooKeeper_plugin: failed to read from socket. Error: {0}'
+                    .format(exception.message))
 
         self.checks_logger.debug('ZooKeeper_plugin: completed, returning')
 
@@ -72,11 +87,49 @@ class ZooKeeper(object):
             data[key] = int(value)
         return data
 
+    def convert_mntr(self, data, reply):
+        """
+        zk_version 3.4.6-1569965, built on 02/20/2014 09:09 GMT
+        zk_avg_latency 0
+        zk_max_latency 751
+        zk_min_latency 0
+        zk_packets_received 101850
+        zk_packets_sent 101916
+        zk_num_alive_connections 1
+        zk_outstanding_requests 0
+        zk_server_state standalone
+        zk_znode_count 19
+        zk_watch_count 0
+        zk_ephemerals_count 0
+        zk_approximate_data_size 430
+        zk_open_file_descriptor_count 37
+        zk_max_file_descriptor_count 10240
+        """
+
+        for line in reply.split('\n'):
+            if not line:
+                continue
+            split_line = line.split('\t')
+            key = split_line[0]
+            if key == 'zk_version':
+                continue
+
+            value = split_line[1].split('.')[0]
+            if key == 'zk_server_state':
+                if value == 'standalone':
+                    value = 0
+                else:
+                    value = 1
+
+            data[key] = int(value)
+
+        return data
+
     def convert_ruok(self, data, reply):
         if reply == 'imok':
-            data['imok'] = 1
-        else:
             data['imok'] = 0
+        else:
+            data['imok'] = 1
         return data
 
     def convert_srvr(self, data, reply):
@@ -93,7 +146,6 @@ class ZooKeeper(object):
         for line in reply.split('\n'):
             if not line or line.startswith('Zookeeper version'):
                 continue
-            print line
             key, value = line.split(':')
 
             if key in ['Mode', 'Zxid']:

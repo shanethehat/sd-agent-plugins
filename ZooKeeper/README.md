@@ -1,7 +1,7 @@
 ZooKeeper Plugin
 ===
 
-This plugin gets stats from a [ZooKeeper server](http://zookeeper.apache.org/) 
+This plugin gets stats from a [ZooKeeper server](http://zookeeper.apache.org/)
 
 Configuration
 ---
@@ -21,3 +21,5 @@ port: 2181
 
 Recommended alerts
 ---
+
+* `ruok` - This should be 0, if ZooKeeper isn't or it doesn't respond it will go to 1.
