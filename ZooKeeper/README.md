@@ -28,7 +28,8 @@ Recommended alerts
 
 Metrics
 ---
-Below is an example payload returned by the plugin.
+Below is an example payload returned by the plugin. For a more detailed explaination see
+[ZooKeeper Monitoring Commands](https://zookeeper.apache.org/doc/r3.3.3/zookeeperAdmin.html#sc_zkCommands)
 
 ```
 {
