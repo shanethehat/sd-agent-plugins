@@ -41,10 +41,19 @@ class ZooKeeper(object):
                 # set a timeout for socket operation
                 s.settimeout(4)
 
+                if 'ZooKeeper' not in self.raw_config:
+                    host = 'localhost'
+                    port = 2181
+                else:
+                    host = self.raw_config['ZooKeeper'].get(
+                        'host', 'localhost')
+                    port = int(self.raw_config['ZooKeeper'].get(
+                        'host', '2181'))
+
                 s.connect(
-                    (self.raw_config['ZooKeeper']['host'],
-                     int(self.raw_config['ZooKeeper']['port']))
+                    (host, port)
                 )
+
                 s.sendall(command)
                 reply = s.recv(1024)
                 if command == 'conf':
