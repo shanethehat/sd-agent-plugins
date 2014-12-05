@@ -34,10 +34,6 @@ class Redis(object):
         self.host = self.raw_config['Redis'].get('host', 'localhost')
         self.port = int(self.raw_config['Redis'].get('port', '6379'))
         self.dbs = self.raw_config['Redis'].get('dbs', ['0'])
-        self.ignore_files = ['run_id', 'redis_build_id', 'os', 'config_file',
-                             'redis_mode', 'multiplexing_api', 'redis_version',
-                             'gcc_version', 'aof_last_bgrewrite_status',
-                             'rdb_last_bgsave_status', 'mem_allocator']
 
     def run(self):
         import redis
@@ -54,8 +50,6 @@ class Redis(object):
             return data
 
         for name, value in stats.iteritems():
-            if name in self.ignore_files:
-                continue
 
             if name in ['used_memory_peak_human', 'used_memory_human']:
                 value = float(value[0:-1])
@@ -63,8 +57,12 @@ class Redis(object):
             if name == 'role' and value == 'master':
                 value = 1
 
-            print name, value
-            data[name] = int(value)
+            try:
+                data[name] = float(value)
+            except ValueError:
+                # some values are text rather numbers
+                # fail and move on
+                pass
         return data
 
 
