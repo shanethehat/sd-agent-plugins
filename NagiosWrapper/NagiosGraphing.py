@@ -26,6 +26,10 @@ class NagiosGraphing:
 
             for line in out.split('\n'):
                 if 'check_eximqueue' in pluginCommandLine:
-                    data['check_eximqueue'] = out.split()[3]
+                    for output in out.split():
+                        try:
+                            data['check_eximqueue'] = float(output)
+                        except ValueError:
+                            pass
 
         return data
