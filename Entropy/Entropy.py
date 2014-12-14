@@ -4,7 +4,7 @@
   http://plugins.serverdensity.com/entropy/
   https://github.com/serverdensity/sd-agent-plugins/
   Autor: @bitbeans
-  Version: 1.0.0
+  Version: 1.0.1
 """
 import json
 import sys
@@ -14,7 +14,7 @@ import logging
 import time
 from decimal import *
 
-class Entropy (object):
+class Entropy(object):
 
     def __init__(self, agentConfig, checksLogger, rawConfig):
         self.agentConfig = agentConfig
@@ -25,10 +25,12 @@ class Entropy (object):
     def run(self):
         data = {}
         if platform.system() == 'Linux':
-            e = subprocess.check_output("cat /proc/sys/kernel/random/entropy_avail", shell=True)
+            e = subprocess.check_output(
+                "cat /proc/sys/kernel/random/entropy_avail", shell=True)
             data = {'available': float(e)}
         else:
-            self.checks_logger.error('Plugin currently only available on Linux.')
+            self.checks_logger.error(
+                'Plugin currently only available on Linux.')
         return data
 
 if __name__ == '__main__':
