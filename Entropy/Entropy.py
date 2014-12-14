@@ -14,6 +14,7 @@ import logging
 import time
 from decimal import *
 
+
 class Entropy(object):
 
     def __init__(self, agentConfig, checksLogger, rawConfig):
