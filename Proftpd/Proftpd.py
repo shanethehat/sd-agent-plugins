@@ -21,7 +21,8 @@ try:
     if float(c) < 2:
         raise Exception("Missing proftpd")
 except Exception:
-    sys.exit(0)     
+    sys.exit(0)
+
 
 class Proftpd(object):
 
@@ -39,7 +40,6 @@ class Proftpd(object):
             try:
                 e = subprocess.check_output(
                     "ftpwho -o oneline | grep '^[ 0-9]'", shell=True).strip()
-            
                 connections = e.split('\n')
                 for connection in connections:
                     tmpuser = connection.split(' ')
@@ -73,4 +73,3 @@ if __name__ == '__main__':
             main_checks_logger.exception("Unhandled exception")
         finally:
             time.sleep(60)
-
