@@ -7,6 +7,10 @@ Setup
 ---
 This plugin uses the output from `sudo docker ps -l --no-trunc` to collect data about all the running containers.
 
+Depending on how you are running the agent you maybe need to give the sd-agent more permissions.
+[plugins requiring sudo](https://support.serverdensity.com/hc/en-us/articles/201253683-Plugins-requiring-sudo)
+has more information.
+
 Metrics
 ---
 Any container on this wil be reported using available data from `/sys/fs/cgroup/`. The following list of files contain the statistics reported by the agent:
