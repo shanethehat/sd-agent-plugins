@@ -153,11 +153,35 @@ class MySQL(object):
                     'mysql: MySQL query error when getting Slow_queries = {}'.format(
                         message)
                     )
+                return False
             self.checks_logger.debug('mysql: getting Slow_queries - done')
 
             # Note!
             # Slow queries per second.
             # How to calculate that.
+
+
+            # Connections
+            try:
+                cursor = db.cursor()
+                cursor.execute('SHOW STATUS LIKE "Threads_connected"')
+                result = cursor.fetchone()
+                status['threads_connected'] = result[1]
+
+                cursor.execute('SHOW STATUS LIKE "Threads_running"')
+                result = cursor.fetchone()
+                status['threads_running'] = result[1]
+
+                cursor.execute('SHOW VARIABLES LIKE "max_connections"')
+                result = cursor.fetchone()
+                status['max_connections'] = result[1]
+
+            except MySQLdb.OperationalError as message:
+                self.checks_logger.error(
+                    'mysql: MySQL query error when getting Threads_connected'.format(
+                        message)
+                )
+                return False
 
         except Exception:
             self.checks_logger.error(
