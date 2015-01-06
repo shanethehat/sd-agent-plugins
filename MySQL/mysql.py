@@ -160,6 +160,18 @@ class MySQL(object):
             # queries per second.
             # How to calculate that.
 
+            try:
+                cursor = db.cursor()
+                cursor.execute(
+                    'SHOW GLOBAL STATUS LIKE "Queries"')
+                # what to use to divide seconds? uptime?
+            except MySQLdb.OperationalError as message:
+                self.checks_logger.debug(
+                    'mysql: MySQL query error when getting QPS = {}'.format(
+                        message)
+                )
+                return False
+            self.checks_logger.debug('mysql: getting QPS - done')
 
             # Connections
             try:
