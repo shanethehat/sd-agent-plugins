@@ -17,6 +17,7 @@ mysql_plugin_pass: password
 
 mysql_plugin_port: 3306
 mysql_plugin_socket: /tmp/mysql.sock
+mysql_slave: true
 
 
 
