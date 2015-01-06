@@ -157,7 +157,7 @@ class MySQL(object):
             self.checks_logger.debug('mysql: getting Slow_queries - done')
 
             # Note!
-            # Slow queries per second.
+            # queries per second.
             # How to calculate that.
 
 
@@ -214,7 +214,6 @@ class MySQL(object):
                 )
                 return False
             self.checks_logger.debug('mysql: getting buffer pool - done')
-
 
             # Qcache items
             try:
