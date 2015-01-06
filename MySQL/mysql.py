@@ -26,12 +26,12 @@ class MySQL(object):
 
     def preliminaries(self):
         if ('MySQLServer' not in self.raw_config
-            and 'mysql_server' not in self.raw_config['MySQLServer']
-            or self.raw_config['MySQLServer']['mysql_server'] == ''
-            or self.raw_config['MySQLServer']['mysql_user'] == ''
-            or self.raw_config['MySQLServer']['mysql_pass'] == ''):
-                self.checks_logger.debug('mysql: config not set')
-                return False
+                and 'mysql_server' not in self.raw_config['MySQLServer']
+                or self.raw_config['MySQLServer']['mysql_server'] == ''
+                or self.raw_config['MySQLServer']['mysql_user'] == ''
+                or self.raw_config['MySQLServer']['mysql_pass'] == ''):
+            self.checks_logger.debug('mysql: config not set')
+            return False
 
         if not self.raw_config['MySQLServer'].get('mysql_port'):
             self.raw_config['MySQLServer']['mysql_port'] = "3306"
@@ -116,7 +116,8 @@ class MySQL(object):
                 result = cursor.fetchone()
 
                 version = result[0].split('-')
-                # Case 31237. Might include a description e.g. 4.1.26-log. See http://dev.mysql.com/doc/refman/4.1/en/information-functions.html#function_version
+                # Case 31237. Might include a description e.g. 4.1.26-log.
+                # See http://dev.mysql.com/doc/refman/4.1/en/information-functions.html#function_version
                 version = version[0].split('.')
 
                 status['version'] = []
