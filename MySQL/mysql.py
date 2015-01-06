@@ -178,10 +178,42 @@ class MySQL(object):
 
             except MySQLdb.OperationalError as message:
                 self.checks_logger.error(
-                    'mysql: MySQL query error when getting Threads_connected'.format(
+                    'mysql: MySQL query error when getting Threads_connected: '.format(
                         message)
                 )
                 return False
+            self.checks_logger.debug('mysql: getting connections - done')
+
+            # Buffer pool
+            try:
+                cursor = db.cursor()
+                cursor.execute(
+                    'SHOW STATUS LIKE "Innodb_buffer_pool_pages_total"')
+                result = cursor.fetchone()
+                status['buffer_pool_pages_total'] = result[1]
+
+                cursor.execute(
+                    'SHOW STATUS LIKE "Innodb_buffer_pool_pages_free"')
+                result = cursor.fetchone()
+                status['buffer_pool_pages_free'] = result[1]
+
+                cursor.execute(
+                    'SHOW STATUS LIKE "Innodb_buffer_pool_pages_dirty"')
+                result = cursor.fetchone()
+                status['buffer_pool_pages_dirty'] = result[1]
+
+                cursor.execute(
+                    'SHOW STATUS LIKE "Innodb_buffer_pool_pages_data"')
+                result = cursor.fetchone()
+                status['buffer_pool_pages_data'] = result[1]
+
+            except MySQLdb.OperationalError as message:
+                self.checks_logger.error(
+                    'mysql: MySQL query error when getting Buffer pool pages = '.format(
+                        message)
+                )
+                return False
+            self.checks_logger.debug('mysql: getting buffer pool - done')
 
         except Exception:
             self.checks_logger.error(
