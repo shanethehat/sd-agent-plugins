@@ -209,11 +209,44 @@ class MySQL(object):
 
             except MySQLdb.OperationalError as message:
                 self.checks_logger.error(
-                    'mysql: MySQL query error when getting Buffer pool pages = '.format(
+                    'mysql: MySQL query error when getting Buffer pool pages = {}'.format(
                         message)
                 )
                 return False
             self.checks_logger.debug('mysql: getting buffer pool - done')
+
+
+            # Qcache items
+            try:
+                cursor = db.cursor()
+                cursor.execute(
+                    'SHOW STATUS LIKE "Qcache_hits"')
+                results = cursor.fetchone()
+                status['qcache_hits'] = results[1]
+
+                # NOTE: needs cache hits per second. How does that relate
+                # to above?
+
+                cursor.execute(
+                    'SHOW STATUS LIKE "Qcache_free_memory"')
+                results = cursor.fetchone()
+                status['qcache_free_memory'] = results[1]
+
+                cursor.execute(
+                    'SHOW STATUS LIKE "Qcache_not_cached"')
+                results = cursor.fetchone()
+                status['qcache_not_cached'] = result[1]
+
+                cursor.execute(
+                    'SHOW STATUS LIKE "Qcache_queries_in_cache"')
+                results = cursor.fetchone()
+                status['qcache_in_cache'] = result[1]
+
+            except MySQLdb.OperationalError as message:
+                self.checks_logger.error(
+                    'mysql: MySQL query error when getting Qcache data = {}'.format(
+                        message))
+            self.checks_logger.debug('mysql: getting Qcache data - done')
 
         except Exception:
             self.checks_logger.error(
