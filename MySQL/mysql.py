@@ -284,6 +284,25 @@ class MySQL(object):
             self.checks_logger.debug(
                 'mysql: getting aborted connections - done')
 
+            # Slave metrics
+            if self.raw_config['MySQLServer'].get('mysql_slave') == 'true':
+                try:
+                    cursor = db.cursor()
+                    cursor.execute(
+                        'SHOW SLAVE STATUS LIKE "Seconds_Behind_Master"')
+                    results = cursor.fetchone()
+                    status['seconds_behind_master'] = results[1]
+
+                except MySQLdb.OperationalError as message:
+                    self.checks_logger.error(
+                        'mysql: MySQL query error when getting aborted items = {}'.format(
+                            message)
+                    )
+                self.checks_logger(
+                    'mysql: getting slave status data - done')
+            else:
+                pass
+
         except Exception:
             self.checks_logger.error(
                 'mysql: unable to get data from MySQL - '
