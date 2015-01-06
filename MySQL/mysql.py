@@ -133,6 +133,32 @@ class MySQL(object):
                         message)
                     )
                 return False
+
+            # Slow queries
+            # Determine query depending on version. For 5.02 and above we
+            # need the GLOBAL keyword (case 31015)
+            try:
+                if (int(status['version'][0]) >= 5
+                        and int(status['version'][2]) >= 2):
+                    query = 'SHOW GLOBAL STATUS LIKE "Slow_queries"'
+                else:
+                    query = 'SHOW STATUS LIKE "Slow_queries'
+
+                cursor = db.cursor()
+                cursor.execute(query)
+                result = cursor.fetchone()
+                status['slow_queries'] = result[1]
+            except MySQLdb.OperationalError as message:
+                self.checks_logger(
+                    'mysql: MySQL query error when getting Slow_queries = {}'.format(
+                        message)
+                    )
+            self.checks_logger.debug('mysql: getting Slow_queries - done')
+
+            # Note!
+            # Slow queries per second.
+            # How to calculate that.
+
         except Exception:
             self.checks_logger.error(
                 'mysql: unable to get data from MySQL - '
