@@ -245,7 +245,32 @@ class MySQL(object):
                 self.checks_logger.error(
                     'mysql: MySQL query error when getting Qcache data = {}'.format(
                         message))
+                return False
+
             self.checks_logger.debug('mysql: getting Qcache data - done')
+
+            # Aborted connections and clients
+            try:
+                cursor = db.cursor()
+                cursor.execute(
+                    'SHOW STATUS LIKE "Aborted_clients"')
+                results = cursor.fetchone()
+                status['aborted_clients'] = results[1]
+
+                cursor.execute(
+                    'SHOW STATUS LIKE "Aborted_connects"')
+                results = cursor.fetchone()
+                status['aborted_connects'] = results[1]
+
+            except MySQLdb.OperationalError as message:
+                self.checks_logger.error(
+                    'mysql: MySQL query error when getting aborted items = {}'.format(
+                        message)
+                )
+                return False
+
+            self.checks_logger.debug(
+                'mysql: getting aborted connections - done')
 
         except Exception:
             self.checks_logger.error(
