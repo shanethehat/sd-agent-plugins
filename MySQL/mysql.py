@@ -172,15 +172,15 @@ class MySQL(object):
                 return False
             self.checks_logger.debug('mysql: getting Slow_queries - done')
 
-            # Note!
-            # queries per second.
-            # How to calculate that.
-
+            # QPS - Queries per second.
             try:
                 cursor = db.cursor()
                 cursor.execute(
                     'SHOW GLOBAL STATUS LIKE "Queries"')
-                # what to use to divide seconds? uptime?
+                results = cursor.fetchone()
+                status['queries_per_second'] = (
+                    int(results[1])/float(status['uptime'])
+                )
             except MySQLdb.OperationalError as message:
                 self.checks_logger.debug(
                     'mysql: MySQL query error when getting QPS = {}'.format(
