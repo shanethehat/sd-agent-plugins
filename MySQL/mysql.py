@@ -153,6 +153,8 @@ class MySQL(object):
             # Slow queries
             # Determine query depending on version. For 5.02 and above we
             # need the GLOBAL keyword (case 31015)
+            # note, update with slow queries store. making it per second?
+            # ask jordi about that.
             try:
                 if (int(status['version'][0]) >= 5
                         and int(status['version'][2]) >= 2):
