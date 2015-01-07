@@ -375,6 +375,19 @@ class MySQL(object):
             self.checks_logger.debug(
                 'mysql: getting slave_running - done')
 
+            # open files
+            try:
+                cursor = db.cursor()
+                cursor.execute('SHOW STATUS LIKE "Open_files"')
+                results = cursor.fetchone()
+                status['open_files'] = results[1]
+            except MySQLdb.OperationalError as message:
+                self.checks_logger.error(
+                    'mysql: MySQL query error when getting open files = {}'.format(
+                        message)
+                )
+                return False
+            self.checks_logger.debug('mysql: getting open_files - done')
 
         except Exception:
             self.checks_logger.error(
