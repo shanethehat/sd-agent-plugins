@@ -303,6 +303,26 @@ class MySQL(object):
             else:
                 pass
 
+            # Created temporary tables in memory and on disk
+            try:
+                cursor = db.cursor()
+                cursor.execute(
+                    'SHOW GLOBAL STATUS LIKE "Created_tmp_tables"')
+                results = cursor.fetchone()
+                status['created_tmp_tables'] = results[1]
+
+                cursor.execute(
+                    'SHOW GLOBAL STATUS LIKE "Created_tmp_disk_tables"')
+                results = cursor.fetchone()
+                status['created_tmp_tables_on_disk'] = results[1]
+            except MySQLServer.OperationalError as message:
+                self.checks_logger.error(
+                    'mysql: MySQL query error when getting temp tables = {}'.format(
+                        message)
+                )
+            self.checks_logger.debug(
+                'mysql: getting temporary tables data - done')
+
         except Exception:
             self.checks_logger.error(
                 'mysql: unable to get data from MySQL - '
