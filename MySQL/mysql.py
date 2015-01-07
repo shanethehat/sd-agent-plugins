@@ -391,6 +391,21 @@ class MySQL(object):
                 return False
             self.checks_logger.debug('mysql: getting open_files - done')
 
+            # table_locks_waited
+            try:
+                cursor = db.cursor()
+                cursor.execute('SHOW STATUS LIKE "Table_locks_waited"')
+                results = cursor.fetchone()
+                status['table_locks_waited'] = results[1]
+            except MySQLdb.OperationalError as message:
+                self.checks_logger.error(
+                    'mysql: MySQL query error when getting table locks waited = {}'.format(
+                        message)
+                )
+                return False
+            self.checks_logger.debug(
+                'mysql: getting table_locks_waited - done')
+
         except Exception:
             self.checks_logger.error(
                 'mysql: unable to get data from MySQL - '
