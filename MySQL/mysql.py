@@ -339,6 +339,23 @@ class MySQL(object):
                 return False
             self.checks_logger.debug('mysql: getting select_full_join - done')
 
+            # slave_running
+            try:
+                cursor = db.cursor()
+                cursor.execute(
+                    'SHOW STATUS LIKE "Slave_running"')
+                results = cursor.fetchone()
+                status['slave_running'] = results[1]
+            except MySQLdb.OperationalError as message:
+                self.checks_logger.error(
+                    'mysql: MySQL query error when getting slave_running = {}'.format(
+                        message)
+                )
+                return False
+            self.checks_logger.debug(
+                'mysql: getting slave_running - done')
+
+
         except Exception:
             self.checks_logger.error(
                 'mysql: unable to get data from MySQL - '
