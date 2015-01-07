@@ -315,13 +315,29 @@ class MySQL(object):
                     'SHOW GLOBAL STATUS LIKE "Created_tmp_disk_tables"')
                 results = cursor.fetchone()
                 status['created_tmp_tables_on_disk'] = results[1]
-            except MySQLServer.OperationalError as message:
+            except MySQLdb.OperationalError as message:
                 self.checks_logger.error(
                     'mysql: MySQL query error when getting temp tables = {}'.format(
                         message)
                 )
+                return False
             self.checks_logger.debug(
                 'mysql: getting temporary tables data - done')
+
+            # select_full_join
+            try:
+                cursor = db.cursor()
+                cursor.execute(
+                    'SHOW GLOBAL STATUS LIKE "Select_full_join"')
+                results = cursor.fetchone()
+                status['select_full_join'] = results[1]
+            except MySQLdb.OperationalError as message:
+                self.checks_logger.error(
+                    'mysql: MySQL query error when getting select full join = {}'.format(
+                        message)
+                )
+                return False
+            self.checks_logger.debug('mysql: getting select_full_join - done')
 
         except Exception:
             self.checks_logger.error(
