@@ -204,6 +204,10 @@ class MySQL(object):
                 result = cursor.fetchone()
                 status['max_connections'] = result[1]
 
+                cursor.execute('SHOW STATUS LIKE "Max_used_connections"')
+                result = cursor.fetchone()
+                status['max_used_connections'] = result[1]
+
             except MySQLdb.OperationalError as message:
                 self.checks_logger.error(
                     'mysql: MySQL query error when getting Threads_connected: {}'.format(
