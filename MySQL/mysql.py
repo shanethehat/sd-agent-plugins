@@ -24,6 +24,13 @@ class MySQL(object):
         self.raw_config = raw_config
         self.connection = None
 
+    def version_is_above_5(self, status):
+        if (int(status['version'][0]) >= 5
+                and int(status['version'][2]) >= 2):
+            return True
+        else:
+            return False
+
     def preliminaries(self):
         if ('MySQLServer' not in self.raw_config
                 and 'mysql_server' not in self.raw_config['MySQLServer']
@@ -156,8 +163,7 @@ class MySQL(object):
             # note, update with slow queries store. making it per second?
             # ask jordi about that.
             try:
-                if (int(status['version'][0]) >= 5
-                        and int(status['version'][2]) >= 2):
+                if self.version_is_above_5(status):
                     query = 'SHOW GLOBAL STATUS LIKE "Slow_queries"'
                 else:
                     query = 'SHOW STATUS LIKE "Slow_queries'
@@ -176,9 +182,12 @@ class MySQL(object):
 
             # QPS - Queries per second.
             try:
+                if self.version_is_above_5(status):
+                    query = 'SHOW GLOBAL STATUS LIKE "Queries"'
+                else:
+                    query = 'SHOW STATUS LIKE "Queries"'
                 cursor = db.cursor()
-                cursor.execute(
-                    'SHOW GLOBAL STATUS LIKE "Queries"')
+                cursor.execute(query)
                 results = cursor.fetchone()
                 status['queries_per_second'] = (
                     int(results[1])/float(status['uptime'])
@@ -327,14 +336,20 @@ class MySQL(object):
 
             # Created temporary tables in memory and on disk
             try:
+                if self.version_is_above_5(status):
+                    query = 'SHOW GLOBAL STATUS LIKE "Created_tmp_tables"'
+                else:
+                    query = 'SHOW STATUS LIKE "Created_tmp_tables"'
                 cursor = db.cursor()
-                cursor.execute(
-                    'SHOW GLOBAL STATUS LIKE "Created_tmp_tables"')
+                cursor.execute(query)
                 results = cursor.fetchone()
                 status['created_tmp_tables'] = results[1]
 
-                cursor.execute(
-                    'SHOW GLOBAL STATUS LIKE "Created_tmp_disk_tables"')
+                if self.version_is_above_5(status):
+                    query = 'SHOW GLOBAL STATUS LIKE "Created_tmp_disk_tables"'
+                else:
+                    query = 'SHOW STATUS LIKE "Created_tmp_disk_tables"'
+                cursor.execute(query)
                 results = cursor.fetchone()
                 status['created_tmp_tables_on_disk'] = results[1]
             except MySQLdb.OperationalError as message:
@@ -348,9 +363,12 @@ class MySQL(object):
 
             # select_full_join
             try:
+                if self.version_is_above_5(status):
+                    query = 'SHOW GLOBAL STATUS LIKE "Select_full_join"'
+                else:
+                    query = 'SHOW STATUS LIKE "Select_full_join"'
                 cursor = db.cursor()
-                cursor.execute(
-                    'SHOW GLOBAL STATUS LIKE "Select_full_join"')
+                cursor.execute(query)
                 results = cursor.fetchone()
                 status['select_full_join'] = results[1]
             except MySQLdb.OperationalError as message:
