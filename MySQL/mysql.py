@@ -44,6 +44,7 @@ class MySQL(object):
             self.checks_logger.error('mysql: unable to import MySQLdb')
             return False
 
+        # Note, code here doesn't really make sense. See what I copied.
         if not self.raw_config['MySQLServer'].get('mysql_port'):
             # Connect
             try:
@@ -133,6 +134,21 @@ class MySQL(object):
                         message)
                     )
                 return False
+
+            # get uptime
+            try:
+                cursor = db.cursor()
+                cursor.execute(
+                    'SHOW STATUS LIKE "Uptime"')
+                results = cursor.fetchone()
+                status['uptime'] = results[1]
+            except MySQLdb.OperationalError as message:
+                self.checks_logger.error(
+                    'mysql: MySQL query error when getting uptime = {}'.format(
+                        message)
+                )
+                return False
+            self.checks_logger.debug('mysql: getting uptime - done')
 
             # Slow queries
             # Determine query depending on version. For 5.02 and above we
