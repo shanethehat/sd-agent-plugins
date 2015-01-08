@@ -200,7 +200,7 @@ class MySQL(object):
                 return False
             self.checks_logger.debug('mysql: getting QPS - done')
 
-            # Connections
+            # Connection pool
             try:
                 cursor = db.cursor()
                 cursor.execute('SHOW STATUS LIKE "Threads_connected"')
@@ -258,7 +258,7 @@ class MySQL(object):
                 return False
             self.checks_logger.debug('mysql: getting buffer pool - done')
 
-            # Qcache items
+            # Query cache items
             try:
                 cursor = db.cursor()
                 cursor.execute(
@@ -315,7 +315,8 @@ class MySQL(object):
             self.checks_logger.debug(
                 'mysql: getting aborted connections - done')
 
-            # Slave metrics
+            # Replication - seconds behind master
+            # note, is it enough? compared to old code?
             if self.raw_config['MySQLServer'].get('mysql_slave') == 'true':
                 try:
                     cursor = db.cursor()
