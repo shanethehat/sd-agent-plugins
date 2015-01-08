@@ -31,6 +31,7 @@ class MySQL(object):
         self.checks_logger = checks_logger
         self.raw_config = raw_config
         self.connection = None
+        self.datastore = {}
 
     def version_is_above_5(self, status):
         if (int(status['version'][0]) >= 5
@@ -48,6 +49,21 @@ class MySQL(object):
             cursor.execute(query)
             results = cursor.fetchone()[1]
         return results
+
+    def calculate_per_s(self, command, result):
+        if (not self.datastore.get(command)
+                and self.datastore.get(command) != 0):
+            self.checks_logger.debug(
+                'mysql: Datastore unset for '
+                '{}, storing for first time'.format(command))
+            self.datastore[command] = result
+            com_per_s = 0
+        else:
+            com_per_s = (result - self.datastore[command]) / 60
+            if com_per_s < 0:
+                com_per_s = 0
+            self.datastore[command] = result
+        return com_per_s
 
     def preliminaries(self):
         if ('MySQLServer' not in self.raw_config
