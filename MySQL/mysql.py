@@ -274,6 +274,9 @@ class MySQL(object):
                 results = cursor.fetchone()
                 status['qcache_hits'] = results[1]
 
+                status['qcache_hits/s'] = (
+                    int(status['qcache_hits'])/float(status['Uptime'])
+                )
                 # NOTE: needs cache hits per second. How does that relate
                 # to above?
 
