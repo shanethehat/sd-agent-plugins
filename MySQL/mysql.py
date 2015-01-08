@@ -440,6 +440,32 @@ class MySQL(object):
             self.checks_logger.debug(
                 'mysql: getting table_locks_waited - done')
 
+            # checkpoint age
+            try:
+                cursor = db.cursor()
+                cursor.execute('SHOW ENGINE INNODB STATUS')
+                results = cursor.fetchone()[2]
+
+                log_loci = results.find('Log sequence number')
+                checkpoint_loci = results.find('Last checkpoint at')
+
+                log_nr = int(re.search(r'\d+', results[log_loci:]).group(0))
+                cp_nr = int(re.search(r'\d+', results[checkpoint_loci:]).group(0))
+
+                cp_age = cp_nr - log_nr
+                status['Checkpoint age'] = cp_age
+
+            except MySQLdb.OperationalError as message:
+                self.checks_logger.error(
+                    'mysql: MySQL query error when getting checkpoint age = {}'.format(
+                        message)
+                )
+                return False
+            self.checks_logger.debug(
+                'mysql: getting checkpoint age - done')
+
+
+
             # com commands per second
             try:
                 cursor = db.cursor()
