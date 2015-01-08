@@ -23,7 +23,6 @@ COMMANDS = [
     'Com_update'
 ]
 
-
 class MySQL(object):
 
     def __init__(self, agent_config, checks_logger, raw_config):
@@ -304,6 +303,50 @@ class MySQL(object):
                 return False
 
             self.checks_logger.debug('mysql: getting Qcache data - done')
+
+            # writes, reads, transactions
+            try:
+                # writes
+                insert = self.get_db_results(
+                    db, 'SHOW STATUS LIKE "Com_insert"')
+
+                replace = self.get_db_results(
+                    db, 'SHOW STATUS LIKE "Com_replace"')
+
+                update = self.get_db_results(
+                    db, 'SHOW STATUS LIKE "Com_update"')
+
+                delete = self.get_db_results(
+                    db, 'SHOW STATUS LIKE "Com_delete"')
+
+                writes = insert + replace + update + delete
+                status['Writes/s'] = self.calculate_per_s('writes', writes)
+
+                # reads
+                select = self.get_db_results(
+                    db, 'SHOW STATUS LIKE "Com_select"')
+
+                reads = select + status['qcache_hits']
+                status['Reads/s'] = self.calculate_per_s('reads', reads)
+
+                # transactions
+                commit = self.get_db_results(
+                    db, 'SHOW STATUS LIKE "Com_commit"')
+
+                rollback = self.get_db_results(
+                    db, 'SHOW STATUS LIKE "Com_rollback"')
+
+                transactions = commit + rollback
+                status['Transactions/s'] = self.calculate_per_s(
+                    'transactions', transactions)
+
+            except MySQLdb.OperationalError as message:
+                self.checks_logger.error(
+                    'mysql: MySQL query error when getting writes,'
+                    ' reads and transactions = {}'.format(
+                        message)
+                )
+                return False
 
             # Aborted connections and clients
             try:
