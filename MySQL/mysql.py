@@ -150,20 +150,20 @@ class MySQL(object):
                     )
                 return False
 
-            # get uptime
+            # get Uptime
             try:
                 cursor = db.cursor()
                 cursor.execute(
                     'SHOW STATUS LIKE "Uptime"')
                 results = cursor.fetchone()
-                status['uptime'] = results[1]
+                status['Uptime'] = results[1]
             except MySQLdb.OperationalError as message:
                 self.checks_logger.error(
-                    'mysql: MySQL query error when getting uptime = {}'.format(
+                    'mysql: MySQL query error when getting Uptime = {}'.format(
                         message)
                 )
                 return False
-            self.checks_logger.debug('mysql: getting uptime - done')
+            self.checks_logger.debug('mysql: getting Uptime - done')
 
             # Slow queries
             # Determine query depending on version. For 5.02 and above we
@@ -179,7 +179,7 @@ class MySQL(object):
                 cursor = db.cursor()
                 cursor.execute(query)
                 result = cursor.fetchone()
-                status['slow_queries'] = result[1]
+                status['Slow queries'] = result[1]
             except MySQLdb.OperationalError as message:
                 self.checks_logger(
                     'mysql: MySQL query error when getting Slow_queries = {}'.format(
@@ -197,8 +197,8 @@ class MySQL(object):
                 cursor = db.cursor()
                 cursor.execute(query)
                 results = cursor.fetchone()
-                status['queries_per_second'] = (
-                    int(results[1])/float(status['uptime'])
+                status['Queries per second'] = (
+                    int(results[1])/float(status['Uptime'])
                 )
             except MySQLdb.OperationalError as message:
                 self.checks_logger.debug(
@@ -436,7 +436,7 @@ class MySQL(object):
             self.checks_logger.debug(
                 'mysql: getting table_locks_waited - done')
 
-            # com commands
+            # com commands per second
             try:
                 cursor = db.cursor()
                 for command in COMMANDS:
@@ -446,7 +446,7 @@ class MySQL(object):
                         query = 'SHOW STATUS LIKE "{}"'.format(command)
                     cursor.execute(query)
                     results = cursor.fetchone()
-                    status[command] = int(results[1])/float(status['uptime'])
+                    status[command+'/s'] = int(results[1])/float(status['Uptime'])
             except MySQLdb.OperationalError as message:
                 self.checks_logger.error(
                     'mysql: MySQL query error when getting com commands = {}'.format(
