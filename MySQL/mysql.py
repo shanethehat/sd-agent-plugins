@@ -365,10 +365,15 @@ class MySQL(object):
                 return False
             self.checks_logger.debug('mysql: getting select_full_join - done')
 
-            # slave_running, note needs to be modified. currently off.
+            # slave_running
             try:
-                status['slave_running'] = self.get_db_results(
+                result = self.get_db_results(
                     db, 'SHOW STATUS LIKE "Slave_running"')
+                if result == 'OFF':
+                    result = 0
+                else:
+                    result = 1
+                status['slave_running'] = result
             except MySQLdb.OperationalError as message:
                 self.checks_logger.error(
                     'mysql: MySQL query error when getting slave_running = {}'.format(
