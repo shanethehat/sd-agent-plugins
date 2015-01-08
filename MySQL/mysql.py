@@ -15,6 +15,14 @@ try:
 except ImportError:
     pass
 
+# com commands.
+COMMANDS = [
+    'Com_show_status',
+    'Com_select',
+    'Com_delete',
+    'Com_update'
+]
+
 
 class MySQL(object):
 
@@ -424,6 +432,26 @@ class MySQL(object):
                 return False
             self.checks_logger.debug(
                 'mysql: getting table_locks_waited - done')
+
+            # com commands
+            try:
+                cursor = db.cursor()
+                for command in COMMANDS:
+                    if self.version_is_above_5(status):
+                        query = 'SHOW GLOBAL STATUS LIKE "{}"'.format(command)
+                    else:
+                        query = 'SHOW STATUS LIKE "{}"'.format(command)
+                    cursor.execute(query)
+                    results = cursor.fetchone()
+                    status[command] = int(results[1])/float(status['uptime'])
+            except MySQLdb.OperationalError as message:
+                self.checks_logger.error(
+                    'mysql: MySQL query error when getting com commands = {}'.format(
+                        message)
+                )
+                return False
+            self.checks_logger.debug(
+                'mysql: getting com_commands - done')
 
         except Exception:
             self.checks_logger.error(
