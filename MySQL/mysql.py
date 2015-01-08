@@ -217,15 +217,19 @@ class MySQL(object):
 
                 cursor.execute('SHOW STATUS LIKE "Threads_running"')
                 result = cursor.fetchone()
-                status['threads_running'] = result[1]
+                status['threads_running'] = int(result[1])
 
                 cursor.execute('SHOW VARIABLES LIKE "max_connections"')
                 result = cursor.fetchone()
-                status['max_connections'] = result[1]
+                status['max_connections'] = float(result[1])
 
                 cursor.execute('SHOW STATUS LIKE "Max_used_connections"')
                 result = cursor.fetchone()
                 status['max_used_connections'] = result[1]
+
+                status['Connection usage %'] = (
+                    (status['threads_running']/status['max_connections'])*100
+                )
 
             except MySQLdb.OperationalError as message:
                 self.checks_logger.error(
