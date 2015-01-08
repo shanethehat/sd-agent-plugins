@@ -39,6 +39,16 @@ class MySQL(object):
         else:
             return False
 
+    def get_db_results(self, db, query):
+        cursor = db.cursor()
+        try:
+            cursor.execute(query)
+            results = float(cursor.fetchone()[1])
+        except ValueError:
+            cursor.execute(query)
+            results = cursor.fetchone()[1]
+        return results
+
     def preliminaries(self):
         if ('MySQLServer' not in self.raw_config
                 and 'mysql_server' not in self.raw_config['MySQLServer']
@@ -152,11 +162,9 @@ class MySQL(object):
 
             # get Uptime
             try:
-                cursor = db.cursor()
-                cursor.execute(
-                    'SHOW STATUS LIKE "Uptime"')
-                results = cursor.fetchone()
-                status['Uptime'] = results[1]
+                status['Uptime'] = self.get_db_results(
+                    db, 'SHOW STATUS LIKE "Uptime"'
+                )
             except MySQLdb.OperationalError as message:
                 self.checks_logger.error(
                     'mysql: MySQL query error when getting Uptime = {}'.format(
@@ -176,10 +184,7 @@ class MySQL(object):
                 else:
                     query = 'SHOW STATUS LIKE "Slow_queries'
 
-                cursor = db.cursor()
-                cursor.execute(query)
-                result = cursor.fetchone()
-                status['Slow queries'] = result[1]
+                status['Slow queries'] = self.get_db_results(db, query)
             except MySQLdb.OperationalError as message:
                 self.checks_logger(
                     'mysql: MySQL query error when getting Slow_queries = {}'.format(
@@ -194,11 +199,9 @@ class MySQL(object):
                     query = 'SHOW GLOBAL STATUS LIKE "Queries"'
                 else:
                     query = 'SHOW STATUS LIKE "Queries"'
-                cursor = db.cursor()
-                cursor.execute(query)
-                results = cursor.fetchone()
+
                 status['Queries per second'] = (
-                    int(results[1])/float(status['Uptime'])
+                    self.get_db_results(db, query)/float(status['Uptime'])
                 )
             except MySQLdb.OperationalError as message:
                 self.checks_logger.debug(
@@ -210,22 +213,17 @@ class MySQL(object):
 
             # Connection pool
             try:
-                cursor = db.cursor()
-                cursor.execute('SHOW STATUS LIKE "Threads_connected"')
-                result = cursor.fetchone()
-                status['threads_connected'] = result[1]
+                status['threads_connected'] = self.get_db_results(
+                    db, 'SHOW STATUS LIKE "Threads_connected"')
 
-                cursor.execute('SHOW STATUS LIKE "Threads_running"')
-                result = cursor.fetchone()
-                status['threads_running'] = int(result[1])
+                status['threads_running'] = self.get_db_results(
+                    db, 'SHOW STATUS LIKE "Threads_running"')
 
-                cursor.execute('SHOW VARIABLES LIKE "max_connections"')
-                result = cursor.fetchone()
-                status['max_connections'] = float(result[1])
+                status['max_connections'] = self.get_db_results(
+                    db, 'SHOW VARIABLES LIKE "max_connections"')
 
-                cursor.execute('SHOW STATUS LIKE "Max_used_connections"')
-                result = cursor.fetchone()
-                status['max_used_connections'] = result[1]
+                status['max_used_connections'] = self.get_db_results(
+                    db, 'SHOW STATUS LIKE "Max_used_connections"')
 
                 status['Connection usage %'] = (
                     (status['threads_running']/status['max_connections'])*100
@@ -241,26 +239,18 @@ class MySQL(object):
 
             # Buffer pool
             try:
-                cursor = db.cursor()
-                cursor.execute(
-                    'SHOW STATUS LIKE "Innodb_buffer_pool_pages_total"')
-                result = cursor.fetchone()
-                status['buffer_pool_pages_total'] = result[1]
 
-                cursor.execute(
-                    'SHOW STATUS LIKE "Innodb_buffer_pool_pages_free"')
-                result = cursor.fetchone()
-                status['buffer_pool_pages_free'] = result[1]
+                status['buffer_pool_pages_total'] = self.get_db_results(
+                    db, 'SHOW STATUS LIKE "Innodb_buffer_pool_pages_total"')
 
-                cursor.execute(
-                    'SHOW STATUS LIKE "Innodb_buffer_pool_pages_dirty"')
-                result = cursor.fetchone()
-                status['buffer_pool_pages_dirty'] = result[1]
+                status['buffer_pool_pages_free'] = self.get_db_results(
+                    db, 'SHOW STATUS LIKE "Innodb_buffer_pool_pages_free"')
 
-                cursor.execute(
-                    'SHOW STATUS LIKE "Innodb_buffer_pool_pages_data"')
-                result = cursor.fetchone()
-                status['buffer_pool_pages_data'] = result[1]
+                status['buffer_pool_pages_dirty'] = self.get_db_results(
+                    db, 'SHOW STATUS LIKE "Innodb_buffer_pool_pages_dirty"')
+
+                status['buffer_pool_pages_data'] = self.get_db_results(
+                    db, 'SHOW STATUS LIKE "Innodb_buffer_pool_pages_data"')
 
             except MySQLdb.OperationalError as message:
                 self.checks_logger.error(
@@ -272,11 +262,8 @@ class MySQL(object):
 
             # Query cache items
             try:
-                cursor = db.cursor()
-                cursor.execute(
-                    'SHOW STATUS LIKE "Qcache_hits"')
-                results = cursor.fetchone()
-                status['qcache_hits'] = results[1]
+                status['qcache_hits'] = self.get_db_results(
+                    db, 'SHOW STATUS LIKE "Qcache_hits"')
 
                 status['qcache_hits/s'] = (
                     int(status['qcache_hits'])/float(status['Uptime'])
@@ -284,20 +271,14 @@ class MySQL(object):
                 # NOTE: needs cache hits per second. How does that relate
                 # to above?
 
-                cursor.execute(
-                    'SHOW STATUS LIKE "Qcache_free_memory"')
-                results = cursor.fetchone()
-                status['qcache_free_memory'] = results[1]
+                status['qcache_free_memory'] = self.get_db_results(
+                    db, 'SHOW STATUS LIKE "Qcache_free_memory"')
 
-                cursor.execute(
-                    'SHOW STATUS LIKE "Qcache_not_cached"')
-                results = cursor.fetchone()
-                status['qcache_not_cached'] = result[1]
+                status['qcache_not_cached'] = self.get_db_results(
+                    db, 'SHOW STATUS LIKE "Qcache_not_cached"')
 
-                cursor.execute(
-                    'SHOW STATUS LIKE "Qcache_queries_in_cache"')
-                results = cursor.fetchone()
-                status['qcache_in_cache'] = result[1]
+                status['qcache_in_cache'] = self.get_db_results(
+                    db, 'SHOW STATUS LIKE "Qcache_queries_in_cache"')
 
             except MySQLdb.OperationalError as message:
                 self.checks_logger.error(
@@ -309,16 +290,11 @@ class MySQL(object):
 
             # Aborted connections and clients
             try:
-                cursor = db.cursor()
-                cursor.execute(
-                    'SHOW STATUS LIKE "Aborted_clients"')
-                results = cursor.fetchone()
-                status['aborted_clients'] = results[1]
+                status['aborted_clients'] = self.get_db_results(
+                    db, 'SHOW STATUS LIKE "Aborted_clients"')
 
-                cursor.execute(
-                    'SHOW STATUS LIKE "Aborted_connects"')
-                results = cursor.fetchone()
-                status['aborted_connects'] = results[1]
+                status['aborted_connects'] = self.get_db_results(
+                    db, 'SHOW STATUS LIKE "Aborted_connects"')
 
             except MySQLdb.OperationalError as message:
                 self.checks_logger.error(
@@ -334,11 +310,8 @@ class MySQL(object):
             # note, is it enough? compared to old code?
             if self.raw_config['MySQLServer'].get('mysql_slave') == 'true':
                 try:
-                    cursor = db.cursor()
-                    cursor.execute(
-                        'SHOW SLAVE STATUS LIKE "Seconds_Behind_Master"')
-                    results = cursor.fetchone()
-                    status['seconds_behind_master'] = results[1]
+                    status['seconds_behind_master'] = self.get_db_results(
+                        db, 'SHOW SLAVE STATUS LIKE "Seconds_Behind_Master"')
 
                 except MySQLdb.OperationalError as message:
                     self.checks_logger.error(
@@ -356,18 +329,16 @@ class MySQL(object):
                     query = 'SHOW GLOBAL STATUS LIKE "Created_tmp_tables"'
                 else:
                     query = 'SHOW STATUS LIKE "Created_tmp_tables"'
-                cursor = db.cursor()
-                cursor.execute(query)
-                results = cursor.fetchone()
-                status['created_tmp_tables'] = results[1]
+                status['created_tmp_tables'] = self.get_db_results(
+                    db, query)
 
                 if self.version_is_above_5(status):
                     query = 'SHOW GLOBAL STATUS LIKE "Created_tmp_disk_tables"'
                 else:
                     query = 'SHOW STATUS LIKE "Created_tmp_disk_tables"'
-                cursor.execute(query)
-                results = cursor.fetchone()
-                status['created_tmp_tables_on_disk'] = results[1]
+                status['created_tmp_tables_on_disk'] = self.get_db_results(
+                    db, query)
+
             except MySQLdb.OperationalError as message:
                 self.checks_logger.error(
                     'mysql: MySQL query error when getting temp tables = {}'.format(
@@ -383,10 +354,9 @@ class MySQL(object):
                     query = 'SHOW GLOBAL STATUS LIKE "Select_full_join"'
                 else:
                     query = 'SHOW STATUS LIKE "Select_full_join"'
-                cursor = db.cursor()
-                cursor.execute(query)
-                results = cursor.fetchone()
-                status['select_full_join'] = results[1]
+                status['select_full_join'] = self.get_db_results(
+                    db, query)
+
             except MySQLdb.OperationalError as message:
                 self.checks_logger.error(
                     'mysql: MySQL query error when getting select full join = {}'.format(
@@ -395,13 +365,10 @@ class MySQL(object):
                 return False
             self.checks_logger.debug('mysql: getting select_full_join - done')
 
-            # slave_running
+            # slave_running, note needs to be modified. currently off.
             try:
-                cursor = db.cursor()
-                cursor.execute(
-                    'SHOW STATUS LIKE "Slave_running"')
-                results = cursor.fetchone()
-                status['slave_running'] = results[1]
+                status['slave_running'] = self.get_db_results(
+                    db, 'SHOW STATUS LIKE "Slave_running"')
             except MySQLdb.OperationalError as message:
                 self.checks_logger.error(
                     'mysql: MySQL query error when getting slave_running = {}'.format(
@@ -413,10 +380,8 @@ class MySQL(object):
 
             # open files
             try:
-                cursor = db.cursor()
-                cursor.execute('SHOW STATUS LIKE "Open_files"')
-                results = cursor.fetchone()
-                status['open_files'] = results[1]
+                status['open_files'] = self.get_db_results(
+                    db, 'SHOW STATUS LIKE "Open_files"')
             except MySQLdb.OperationalError as message:
                 self.checks_logger.error(
                     'mysql: MySQL query error when getting open files = {}'.format(
@@ -427,10 +392,8 @@ class MySQL(object):
 
             # table_locks_waited
             try:
-                cursor = db.cursor()
-                cursor.execute('SHOW STATUS LIKE "Table_locks_waited"')
-                results = cursor.fetchone()
-                status['table_locks_waited'] = results[1]
+                status['table_locks_waited'] = self.get_db_results(
+                    db, 'SHOW STATUS LIKE "Table_locks_waited"')
             except MySQLdb.OperationalError as message:
                 self.checks_logger.error(
                     'mysql: MySQL query error when getting table locks waited = {}'.format(
@@ -464,8 +427,6 @@ class MySQL(object):
             self.checks_logger.debug(
                 'mysql: getting checkpoint age - done')
 
-
-
             # com commands per second
             try:
                 cursor = db.cursor()
@@ -474,9 +435,10 @@ class MySQL(object):
                         query = 'SHOW GLOBAL STATUS LIKE "{}"'.format(command)
                     else:
                         query = 'SHOW STATUS LIKE "{}"'.format(command)
-                    cursor.execute(query)
-                    results = cursor.fetchone()
-                    status[command+'/s'] = int(results[1])/float(status['Uptime'])
+                    status[command+'/s'] = (
+                        self.get_db_results(db, query)/status['Uptime']
+                    )
+
             except MySQLdb.OperationalError as message:
                 self.checks_logger.error(
                     'mysql: MySQL query error when getting com commands = {}'.format(
