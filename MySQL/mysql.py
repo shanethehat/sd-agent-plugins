@@ -216,9 +216,10 @@ class MySQL(object):
                 else:
                     query = 'SHOW STATUS LIKE "Queries"'
 
-                status['Queries per second'] = (
-                    self.get_db_results(db, query)/float(status['Uptime'])
-                )
+                qps = self.calculate_per_s('qps', self.get_db_results(
+                    db, query))
+                status['Queries per second'] = qps
+
             except MySQLdb.OperationalError as message:
                 self.checks_logger.debug(
                     'mysql: MySQL query error when getting QPS = {}'.format(
@@ -281,9 +282,9 @@ class MySQL(object):
                 status['qcache_hits'] = self.get_db_results(
                     db, 'SHOW STATUS LIKE "Qcache_hits"')
 
-                status['qcache_hits/s'] = (
-                    int(status['qcache_hits'])/float(status['Uptime'])
-                )
+                qcache_ps = self.calculate_per_s('qcache_ps', status[
+                    'qcache_hits'])
+                status['qcache_hits/s'] = qcache_ps
                 # NOTE: needs cache hits per second. How does that relate
                 # to above?
 
@@ -456,9 +457,10 @@ class MySQL(object):
                         query = 'SHOW GLOBAL STATUS LIKE "{}"'.format(command)
                     else:
                         query = 'SHOW STATUS LIKE "{}"'.format(command)
-                    status[command+'/s'] = (
-                        self.get_db_results(db, query)/status['Uptime']
+                    com_per_s = self.calculate_per_s(
+                        command, self.get_db_results(db, query)
                     )
+                    status[command+'/s'] = com_per_s
 
             except MySQLdb.OperationalError as message:
                 self.checks_logger.error(
