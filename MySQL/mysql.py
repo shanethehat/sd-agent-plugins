@@ -404,6 +404,10 @@ class MySQL(object):
                 status['created tmp tables on disk'] = self.get_db_results(
                     db, query)
 
+                status['Tmp Cache Hit Ratio'] = (
+                    (1 - (status['created tmp tables on disk']/status['created tmp tables']))*100
+                )
+
             except MySQLdb.OperationalError as message:
                 self.checks_logger.error(
                     'mysql: MySQL query error when getting temp tables = {}'.format(
