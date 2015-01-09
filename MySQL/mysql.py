@@ -228,20 +228,20 @@ class MySQL(object):
 
             # Connection pool
             try:
-                status['threads_connected'] = self.get_db_results(
+                status['threads connected'] = self.get_db_results(
                     db, 'SHOW STATUS LIKE "Threads_connected"')
 
-                status['threads_running'] = self.get_db_results(
+                status['threads running'] = self.get_db_results(
                     db, 'SHOW STATUS LIKE "Threads_running"')
 
-                status['max_connections'] = self.get_db_results(
+                status['max connections'] = self.get_db_results(
                     db, 'SHOW VARIABLES LIKE "max_connections"')
 
-                status['max_used_connections'] = self.get_db_results(
+                status['max used connections'] = self.get_db_results(
                     db, 'SHOW STATUS LIKE "Max_used_connections"')
 
                 status['Connection usage %'] = (
-                    (status['threads_running']/status['max_connections'])*100
+                    (status['threads running']/status['max connections'])*100
                 )
 
             except MySQLdb.OperationalError as message:
@@ -255,16 +255,16 @@ class MySQL(object):
             # Buffer pool
             try:
 
-                status['buffer_pool_pages_total'] = self.get_db_results(
+                status['buffer pool pages total'] = self.get_db_results(
                     db, 'SHOW STATUS LIKE "Innodb_buffer_pool_pages_total"')
 
-                status['buffer_pool_pages_free'] = self.get_db_results(
+                status['buffer pool pages free'] = self.get_db_results(
                     db, 'SHOW STATUS LIKE "Innodb_buffer_pool_pages_free"')
 
-                status['buffer_pool_pages_dirty'] = self.get_db_results(
+                status['buffer pool pages dirty'] = self.get_db_results(
                     db, 'SHOW STATUS LIKE "Innodb_buffer_pool_pages_dirty"')
 
-                status['buffer_pool_pages_data'] = self.get_db_results(
+                status['buffer pool pages data'] = self.get_db_results(
                     db, 'SHOW STATUS LIKE "Innodb_buffer_pool_pages_data"')
 
             except MySQLdb.OperationalError as message:
@@ -277,22 +277,22 @@ class MySQL(object):
 
             # Query cache items
             try:
-                status['qcache_hits'] = self.get_db_results(
+                status['qcache hits'] = self.get_db_results(
                     db, 'SHOW STATUS LIKE "Qcache_hits"')
 
                 qcache_ps = self.calculate_per_s('qcache_ps', status[
-                    'qcache_hits'])
-                status['qcache_hits/s'] = qcache_ps
+                    'qcache hits'])
+                status['qcache hits/s'] = qcache_ps
                 # NOTE: needs cache hits per second. How does that relate
                 # to above?
 
-                status['qcache_free_memory'] = self.get_db_results(
+                status['qcache free memory'] = self.get_db_results(
                     db, 'SHOW STATUS LIKE "Qcache_free_memory"')
 
-                status['qcache_not_cached'] = self.get_db_results(
+                status['qcache not cached'] = self.get_db_results(
                     db, 'SHOW STATUS LIKE "Qcache_not_cached"')
 
-                status['qcache_in_cache'] = self.get_db_results(
+                status['qcache in cache'] = self.get_db_results(
                     db, 'SHOW STATUS LIKE "Qcache_queries_in_cache"')
 
             except MySQLdb.OperationalError as message:
@@ -325,7 +325,7 @@ class MySQL(object):
                 select = self.get_db_results(
                     db, 'SHOW STATUS LIKE "Com_select"')
 
-                reads = select + status['qcache_hits']
+                reads = select + status['qcache hits']
                 status['Reads/s'] = self.calculate_per_s('reads', reads)
 
                 # read write ratio
@@ -355,10 +355,10 @@ class MySQL(object):
 
             # Aborted connections and clients
             try:
-                status['aborted_clients'] = self.get_db_results(
+                status['aborted clients'] = self.get_db_results(
                     db, 'SHOW STATUS LIKE "Aborted_clients"')
 
-                status['aborted_connects'] = self.get_db_results(
+                status['aborted connects'] = self.get_db_results(
                     db, 'SHOW STATUS LIKE "Aborted_connects"')
 
             except MySQLdb.OperationalError as message:
@@ -375,7 +375,7 @@ class MySQL(object):
             # note, is it enough? compared to old code?
             if self.raw_config['MySQLServer'].get('mysql_slave') == 'true':
                 try:
-                    status['seconds_behind_master'] = self.get_db_results(
+                    status['seconds behind master'] = self.get_db_results(
                         db, 'SHOW SLAVE STATUS LIKE "Seconds_Behind_Master"')
 
                 except MySQLdb.OperationalError as message:
@@ -423,7 +423,7 @@ class MySQL(object):
                     query = 'SHOW GLOBAL STATUS LIKE "Select_full_join"'
                 else:
                     query = 'SHOW STATUS LIKE "Select_full_join"'
-                status['select_full_join'] = self.get_db_results(
+                status['select full join'] = self.get_db_results(
                     db, query)
 
             except MySQLdb.OperationalError as message:
@@ -442,7 +442,7 @@ class MySQL(object):
                     result = 0
                 else:
                     result = 1
-                status['slave_running'] = result
+                status['slave running'] = result
             except MySQLdb.OperationalError as message:
                 self.checks_logger.error(
                     'mysql: MySQL query error when getting slave_running = {}'.format(
@@ -454,7 +454,7 @@ class MySQL(object):
 
             # open files
             try:
-                status['open_files'] = self.get_db_results(
+                status['open files'] = self.get_db_results(
                     db, 'SHOW STATUS LIKE "Open_files"')
             except MySQLdb.OperationalError as message:
                 self.checks_logger.error(
@@ -466,7 +466,7 @@ class MySQL(object):
 
             # table_locks_waited
             try:
-                status['table_locks_waited'] = self.get_db_results(
+                status['table locks waited'] = self.get_db_results(
                     db, 'SHOW STATUS LIKE "Table_locks_waited"')
             except MySQLdb.OperationalError as message:
                 self.checks_logger.error(
