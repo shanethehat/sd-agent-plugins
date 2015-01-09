@@ -373,22 +373,34 @@ class MySQL(object):
             self.checks_logger.debug(
                 'mysql: getting aborted connections - done')
 
-            # Replication - seconds behind master
-            # note, is it enough? compared to old code?
-            if self.raw_config['MySQLServer'].get('mysql_slave') == 'true':
-                try:
-                    status['seconds behind master'] = self.get_db_results(
-                        db, 'SHOW SLAVE STATUS LIKE "Seconds_Behind_Master"')
+            # Replication - Seconds Behind Master
+            secondsBehindMaster = None
+            try:
+                cursor = db.cursor(MySQLdb.cursors.DictCursor)
+                cursor.execute('SHOW SLAVE STATUS')
+                result = cursor.fetchone()
 
-                except MySQLdb.OperationalError as message:
-                    self.checks_logger.error(
-                        'mysql: MySQL query error when getting aborted items = {}'.format(
-                            message)
-                    )
-                self.checks_logger(
-                    'mysql: getting slave status data - done')
+            except MySQLdb.OperationalError, message:
+
+                self.mainLogger.error('getMySQLStatus: MySQL query error when getting SHOW SLAVE STATUS = %s', message)
+                result = None
+
+            if result is not None:
+                try:
+                    # Handle the case when Seconds_Behind_Master is NULL
+                    if result['Seconds_Behind_Master'] is None:
+                        secondsBehindMaster = -1
+                    else:
+                        secondsBehindMaster = result['Seconds_Behind_Master']
+
+                    self.mainLogger.debug('getMySQLStatus: secondsBehindMaster = %s', secondsBehindMaster)
+
+                except IndexError, e:
+                    self.mainLogger.debug('getMySQLStatus: secondsBehindMaster empty. %s', e)
+
             else:
-                pass
+                self.mainLogger.debug('getMySQLStatus: secondsBehindMaster empty. Result = None.')
+
 
             # Created temporary tables in memory and on disk
             try:
