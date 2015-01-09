@@ -391,14 +391,14 @@ class MySQL(object):
                     query = 'SHOW GLOBAL STATUS LIKE "Created_tmp_tables"'
                 else:
                     query = 'SHOW STATUS LIKE "Created_tmp_tables"'
-                status['created_tmp_tables'] = self.get_db_results(
+                status['created tmp tables'] = self.get_db_results(
                     db, query)
 
                 if self.version_is_above_5(status):
                     query = 'SHOW GLOBAL STATUS LIKE "Created_tmp_disk_tables"'
                 else:
                     query = 'SHOW STATUS LIKE "Created_tmp_disk_tables"'
-                status['created_tmp_tables_on_disk'] = self.get_db_results(
+                status['created tmp tables on disk'] = self.get_db_results(
                     db, query)
 
             except MySQLdb.OperationalError as message:
@@ -505,7 +505,7 @@ class MySQL(object):
                     com_per_s = self.calculate_per_s(
                         command, self.get_db_results(db, query)
                     )
-                    status[command+'/s'] = com_per_s
+                    status[command.replace('_', ' ')+'/s'] = com_per_s
 
             except MySQLdb.OperationalError as message:
                 self.checks_logger.error(
