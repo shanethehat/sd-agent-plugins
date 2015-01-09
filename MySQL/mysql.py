@@ -135,7 +135,6 @@ class MySQL(object):
 
     def run(self):
         self.checks_logger.debug('mysql: started gathering data')
-
         if not self.preliminaries():
             return False
 
@@ -328,6 +327,9 @@ class MySQL(object):
 
                 reads = select + status['qcache_hits']
                 status['Reads/s'] = self.calculate_per_s('reads', reads)
+
+                #read write ratio
+                status['RW ratio'] reads/writes
 
                 # transactions
                 commit = self.get_db_results(
