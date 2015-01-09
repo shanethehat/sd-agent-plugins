@@ -494,6 +494,30 @@ class MySQL(object):
             self.checks_logger.debug(
                 'mysql: getting checkpoint age - done')
 
+            try:
+                # Key cache hit ratio
+                # http://www.percona.com/blog/2010/02/28/why-you-should-ignore-mysqls-key-cache-hit-ratio/
+                key_read = self.get_db_results(
+                    db, 'SHOW STATUS LIKE "Key_reads"')
+
+                key_requests = self.get_db_results(
+                    db, 'SHOW STATUS LIKE "Key_read_requests')
+
+                status['Key cache hit ratio'] = (
+                    1 - (key_read/key_requests))*100
+
+                status['Key reads/s'] = self.calculate_per_s(
+                    "Key_reads", key_read)
+
+            except MySQLdb.OperationalError as message:
+                self.checks_logger.error(
+                    'mysql: MySQL query error when getting key cache = {}'.format(
+                        message)
+                )
+                return False
+            self.checks_logger.debug(
+                'mysql: getting key cache hit ratio - done')
+
             # com commands per second
             try:
                 cursor = db.cursor()
