@@ -17,10 +17,12 @@ except ImportError:
 
 # com commands.
 COMMANDS = [
-    'Com_show_status',
     'Com_select',
     'Com_delete',
-    'Com_update'
+    'Com_update',
+    'Com_commit',
+    'Questions',
+    'Com_rollback',
 ]
 
 class MySQL(object):
