@@ -527,8 +527,15 @@ class MySQL(object):
 
             # com commands per second
             try:
-                cursor = db.cursor()
-                for command in COMMANDS:
+                if self.raw_config['MySQLServer'].get('mysql_include_per_s'):
+                    user_com_ps = self.raw_config['MySQLServer']['mysql_include_per_s']
+                    user_com_ps = user_com_ps.split(',')
+                    user_com_ps = [com.strip() for com in user_com_ps]
+                    user_com_ps = user_com_ps + COMMANDS
+                else:
+                    user_com_ps = COMMANDS
+
+                for command in user_com_ps:
                     if self.version_is_above_5(status):
                         query = 'SHOW GLOBAL STATUS LIKE "{}"'.format(command)
                     else:
@@ -537,6 +544,21 @@ class MySQL(object):
                         command, self.get_db_results(db, query)
                     )
                     status[command.replace('_', ' ')+'/s'] = com_per_s
+
+                if self.raw_config['MySQLServer'].get('mysql_include'):
+                    user_com = self.raw_config['MySQLServer']['mysql_include']
+                    user_com = user_com.split(',')
+                    user_com = [com.strip() for com in user_com]
+
+                    for command in user_com:
+                        if self.version_is_above_5(status):
+                            query = 'SHOW GLOBAL STATUS LIKE "{}"'.format(command)
+                        else:
+                            query = 'SHOW STATUS LIKE "{}"'.format(command)
+                        com_per_s = self.calculate_per_s(
+                            command, self.get_db_results(db, query)
+                        )
+                        status[command.replace('_', ' ')+'/s'] = com_per_s
 
             except MySQLdb.OperationalError as message:
                 self.checks_logger.error(
@@ -571,7 +593,8 @@ if __name__ == "__main__":
             'mysql_server': host,
             'mysql_port': port,
             'mysql_user': 'jonathan',
-            'mysql_pass': 'password'
+            'mysql_pass': 'password',
+            'mysql_include_per_s': 'Com_check, Com_checksum, Com_begin'
         }
     }
 
