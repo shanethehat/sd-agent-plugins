@@ -328,8 +328,11 @@ class MySQL(object):
                 reads = select + status['qcache_hits']
                 status['Reads/s'] = self.calculate_per_s('reads', reads)
 
-                #read write ratio
-                status['RW ratio'] reads/writes
+                # read write ratio
+                try:
+                    status['RW ratio'] = reads/writes
+                except ZeroDivisionError:
+                    status['RW ratio'] = 0
 
                 # transactions
                 commit = self.get_db_results(
@@ -501,7 +504,7 @@ class MySQL(object):
                     db, 'SHOW STATUS LIKE "Key_reads"')
 
                 key_requests = self.get_db_results(
-                    db, 'SHOW STATUS LIKE "Key_read_requests')
+                    db, 'SHOW STATUS LIKE "Key_read_requests"')
 
                 status['Key cache hit ratio'] = (
                     1 - (key_read/key_requests))*100
