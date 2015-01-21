@@ -25,6 +25,7 @@ COMMANDS = [
     'Com_rollback',
 ]
 
+
 class MySQL(object):
 
     def __init__(self, agent_config, checks_logger, raw_config):
@@ -128,7 +129,8 @@ class MySQL(object):
             # note, how do I take into account the socket?
         except Exception:
             self.checks_logger.error(
-                'Unable to connect to MySQL server {0} - Exception: {1}'.format(
+                'Unable to connect to MySQL server {0}'
+                ' - Exception: {1}'.format(
                     self.config_raw['MySQLServer']['mysql_server'],
                     traceback.format_exc())
                 )
@@ -159,7 +161,8 @@ class MySQL(object):
 
                 version = result[0].split('-')
                 # Case 31237. Might include a description e.g. 4.1.26-log.
-                # See http://dev.mysql.com/doc/refman/4.1/en/information-functions.html#function_version
+                # See http://dev.mysql.com/doc/refman/4.1/en/
+                # information-functions.html#function_version
                 version = version[0].split('.')
 
                 status['version'] = []
@@ -203,7 +206,8 @@ class MySQL(object):
                 status['Slow queries'] = self.get_db_results(db, query)
             except MySQLdb.OperationalError as message:
                 self.checks_logger(
-                    'mysql: MySQL query error when getting Slow_queries = {}'.format(
+                    'mysql: MySQL query error when '
+                    'getting Slow_queries = {}'.format(
                         message)
                     )
                 return False
@@ -248,7 +252,8 @@ class MySQL(object):
 
             except MySQLdb.OperationalError as message:
                 self.checks_logger.error(
-                    'mysql: MySQL query error when getting Threads_connected: {}'.format(
+                    'mysql: MySQL query error when '
+                    'getting Threads_connected: {}'.format(
                         message)
                 )
                 return False
@@ -271,7 +276,8 @@ class MySQL(object):
 
             except MySQLdb.OperationalError as message:
                 self.checks_logger.error(
-                    'mysql: MySQL query error when getting Buffer pool pages = {}'.format(
+                    'mysql: MySQL query error when '
+                    'getting Buffer pool pages = {}'.format(
                         message)
                 )
                 return False
@@ -299,7 +305,8 @@ class MySQL(object):
 
             except MySQLdb.OperationalError as message:
                 self.checks_logger.error(
-                    'mysql: MySQL query error when getting Qcache data = {}'.format(
+                    'mysql: MySQL query error when '
+                    'getting Qcache data = {}'.format(
                         message))
                 return False
 
@@ -365,7 +372,8 @@ class MySQL(object):
 
             except MySQLdb.OperationalError as message:
                 self.checks_logger.error(
-                    'mysql: MySQL query error when getting aborted items = {}'.format(
+                    'mysql: MySQL query error when '
+                    'getting aborted items = {}'.format(
                         message)
                 )
                 return False
@@ -380,9 +388,11 @@ class MySQL(object):
                 cursor.execute('SHOW SLAVE STATUS')
                 result = cursor.fetchone()
 
-            except MySQLdb.OperationalError, message:
+            except MySQLdb.OperationalError as message:
 
-                self.mainLogger.error('getMySQLStatus: MySQL query error when getting SHOW SLAVE STATUS = %s', message)
+                self.mainLogger.error(
+                    'getMySQLStatus: MySQL query error when '
+                    'getting SHOW SLAVE STATUS = %s', message)
                 result = None
 
             if result is not None:
@@ -393,14 +403,20 @@ class MySQL(object):
                     else:
                         secondsBehindMaster = result['Seconds_Behind_Master']
 
-                    self.mainLogger.debug('getMySQLStatus: secondsBehindMaster = %s', secondsBehindMaster)
+                    self.mainLogger.debug(
+                        'getMySQLStatus: '
+                        'secondsBehindMaster = %s', secondsBehindMaster
+                    )
 
-                except IndexError, e:
-                    self.mainLogger.debug('getMySQLStatus: secondsBehindMaster empty. %s', e)
+                except IndexError as e:
+                    self.mainLogger.debug(
+                        'getMySQLStatus: secondsBehindMaster empty. %s', e
+                    )
 
             else:
-                self.mainLogger.debug('getMySQLStatus: secondsBehindMaster empty. Result = None.')
-
+                self.mainLogger.debug(
+                    'getMySQLStatus: secondsBehindMaster empty. Result = None.'
+                )
 
             # Created temporary tables in memory and on disk
             try:
@@ -419,12 +435,14 @@ class MySQL(object):
                     db, query)
 
                 status['Tmp Cache Hit Ratio'] = (
-                    (1 - (status['created tmp tables on disk']/status['created tmp tables']))*100
+                    (1 - (status['created tmp tables on disk'] /
+                          status['created tmp tables'])) * 100
                 )
 
             except MySQLdb.OperationalError as message:
                 self.checks_logger.error(
-                    'mysql: MySQL query error when getting temp tables = {}'.format(
+                    'mysql: MySQL query error when '
+                    'getting temp tables = {}'.format(
                         message)
                 )
                 return False
@@ -442,7 +460,8 @@ class MySQL(object):
 
             except MySQLdb.OperationalError as message:
                 self.checks_logger.error(
-                    'mysql: MySQL query error when getting select full join = {}'.format(
+                    'mysql: MySQL query error when '
+                    'getting select full join = {}'.format(
                         message)
                 )
                 return False
@@ -459,7 +478,8 @@ class MySQL(object):
                 status['slave running'] = result
             except MySQLdb.OperationalError as message:
                 self.checks_logger.error(
-                    'mysql: MySQL query error when getting slave_running = {}'.format(
+                    'mysql: MySQL query error when '
+                    'getting slave_running = {}'.format(
                         message)
                 )
                 return False
@@ -472,7 +492,8 @@ class MySQL(object):
                     db, 'SHOW STATUS LIKE "Open_files"')
             except MySQLdb.OperationalError as message:
                 self.checks_logger.error(
-                    'mysql: MySQL query error when getting open files = {}'.format(
+                    'mysql: MySQL query error when '
+                    'getting open files = {}'.format(
                         message)
                 )
                 return False
@@ -484,7 +505,8 @@ class MySQL(object):
                     db, 'SHOW STATUS LIKE "Table_locks_waited"')
             except MySQLdb.OperationalError as message:
                 self.checks_logger.error(
-                    'mysql: MySQL query error when getting table locks waited = {}'.format(
+                    'mysql: MySQL query error when '
+                    'getting table locks waited = {}'.format(
                         message)
                 )
                 return False
@@ -501,14 +523,16 @@ class MySQL(object):
                 checkpoint_loci = results.find('Last checkpoint at')
 
                 log_nr = int(re.search(r'\d+', results[log_loci:]).group(0))
-                cp_nr = int(re.search(r'\d+', results[checkpoint_loci:]).group(0))
+                cp_nr = int(re.search(
+                    r'\d+', results[checkpoint_loci:]).group(0))
 
                 cp_age = cp_nr - log_nr
                 status['Checkpoint age'] = cp_age
 
             except MySQLdb.OperationalError as message:
                 self.checks_logger.error(
-                    'mysql: MySQL query error when getting checkpoint age = {}'.format(
+                    'mysql: MySQL query error when '
+                    'getting checkpoint age = {}'.format(
                         message)
                 )
                 return False
@@ -532,7 +556,8 @@ class MySQL(object):
 
             except MySQLdb.OperationalError as message:
                 self.checks_logger.error(
-                    'mysql: MySQL query error when getting key cache = {}'.format(
+                    'mysql: MySQL query error when '
+                    'getting key cache = {}'.format(
                         message)
                 )
                 return False
@@ -541,10 +566,11 @@ class MySQL(object):
 
             # com commands per second
             try:
-                if self.raw_config['MySQLServer'].get('mysql_include_per_s'):
-                    user_com_ps = self.raw_config['MySQLServer']['mysql_include_per_s']
+                com = self.raw_config['MySQLServer'].get('mysql_include_per_s')
+                if com:
+                    user_com_ps = com
                     user_com_ps = user_com_ps.split(',')
-                    user_com_ps = [com.strip() for com in user_com_ps]
+                    user_com_ps = [command.strip() for command in user_com_ps]
                     user_com_ps = user_com_ps + COMMANDS
                 else:
                     user_com_ps = COMMANDS
@@ -562,11 +588,12 @@ class MySQL(object):
                 if self.raw_config['MySQLServer'].get('mysql_include'):
                     user_com = self.raw_config['MySQLServer']['mysql_include']
                     user_com = user_com.split(',')
-                    user_com = [com.strip() for com in user_com]
+                    user_com = [command.strip() for command in user_com]
 
                     for command in user_com:
                         if self.version_is_above_5(status):
-                            query = 'SHOW GLOBAL STATUS LIKE "{}"'.format(command)
+                            query = 'SHOW GLOBAL STATUS LIKE "{}"'.format(
+                                command)
                         else:
                             query = 'SHOW STATUS LIKE "{}"'.format(command)
                         com_per_s = self.calculate_per_s(
@@ -576,7 +603,8 @@ class MySQL(object):
 
             except MySQLdb.OperationalError as message:
                 self.checks_logger.error(
-                    'mysql: MySQL query error when getting com commands = {}'.format(
+                    'mysql: MySQL query error when '
+                    'getting com commands = {}'.format(
                         message)
                 )
                 return False
