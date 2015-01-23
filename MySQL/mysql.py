@@ -495,6 +495,10 @@ class MySQL(object):
             try:
                 status['open files'] = self.get_db_results(
                     db, 'SHOW STATUS LIKE "Open_files"')
+
+                status['open files limit'] = self.get_db_results(
+                    db, 'SHOW VARIABLES LIKE "open_files_limit"')
+
             except MySQLdb.OperationalError as message:
                 self.checks_logger.error(
                     'mysql: MySQL query error when '
@@ -554,7 +558,7 @@ class MySQL(object):
                     db, 'SHOW STATUS LIKE "Key_read_requests"')
 
                 status['Key cache hit ratio'] = (
-                    1 - (key_read/key_requests))*100
+                    100 - ((key_read * 100) / key_requests))
 
                 status['Key reads/s'] = self.calculate_per_s(
                     "Key_reads", key_read)
