@@ -122,7 +122,7 @@ if __name__ == '__main__':
             # -l log only the latest created container,
             #    include non-running ones.
             # -a all containers. Only running containers
-            #    are shown by default.
+            #    are shown.
             'containers_shown': '-l'
         }
     }
