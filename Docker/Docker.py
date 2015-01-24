@@ -37,6 +37,9 @@ class Docker(object):
             '/sys/fs/cgroup/blkio/docker/{0}/blkio.io_queued': 'blkio',
         }
 
+        self.containers_shown = self.raw_config['Docker']\
+            .get('containers_shown', '-l')
+
     def run(self):
 
         data = {}
@@ -82,7 +85,7 @@ class Docker(object):
 
     def extract_container_names(self):
         """ Iterate over the output of:
-            sudo docker ps -l
+            sudo docker ps [-l -a]
             CONTAINER ID IMAGE  COMMAND   CREATED  STATUS      PORTS NAMES
             491f2fe3b18f ubuntu /bin/bash 40 hours Up 40 hours focused_feynman
         """
@@ -91,7 +94,7 @@ class Docker(object):
 
         try:
             proc = subprocess.Popen(
-                ['sudo', 'docker', 'ps', '-l', '--no-trunc'],
+                ['sudo', 'docker', 'ps', self.containers_shown, '--no-trunc'],
                 stdout=subprocess.PIPE,
                 close_fds=True)
             docker_ps = proc.communicate()[0]
@@ -116,6 +119,11 @@ if __name__ == '__main__':
 
     raw_agent_config = {
         'Docker': {
+            # -l log only the latest created container,
+            #    include non-running ones.
+            # -a all containers. Only running containers
+            #    are shown.
+            'containers_shown': '-l'
         }
     }
 

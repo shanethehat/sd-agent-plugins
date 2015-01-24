@@ -5,7 +5,7 @@ detailed list of metrics mentioned on [Docker Run Metrics](https://docs.docker.c
 
 Setup
 ---
-This plugin uses the output from `sudo docker ps -l --no-trunc` to collect data about all the running containers.
+This plugin uses the output from `sudo docker ps [-l, -a] --no-trunc` to collect data about all the running containers.
 
 Depending on how you are running the agent you maybe need to give the sd-agent more permissions.
 [plugins requiring sudo](https://support.serverdensity.com/hc/en-us/articles/201253683-Plugins-requiring-sudo)
@@ -35,4 +35,7 @@ and their meaning and possible impact on the hosting server.
 
 Configuration
 ---
-None
+```
+[Docker]
+# -a(all) -l(last) see "docker ps --help" for more information
+containers_shown: -l
