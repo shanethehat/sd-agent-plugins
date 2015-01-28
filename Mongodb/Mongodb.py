@@ -12,6 +12,8 @@ Version: 1.0.0
 import collections
 import datetime
 import traceback
+import time
+import pymongo
 
 
 try:
@@ -529,15 +531,22 @@ class Mongodb(object):
                         dbstats_database = 'dbStats_{0}'.format(database)
                         dbstats_database_namespaces = \
                             'dbStats_{0}_namespaces'.format(database)
-
-                        status[dbstats_database] = \
-                            self.connection[database].command('dbstats')
-                        namespaces = (
-                            self.connection[database]['system']['namespaces']
-                        )
-                        status[dbstats_database_namespaces] = (
-                            namespaces.count()
-                        )
+                        try:
+                            status[dbstats_database] = \
+                                self.connection[database].command('dbstats')
+                            namespaces = (
+                                self.connection[database][
+                                    'system']['namespaces']
+                                )
+                            status[dbstats_database_namespaces] = (
+                                namespaces.count()
+                            )
+                        except pymongo.errors.AutoReconnect:
+                            self.checks_logger.warning(
+                                'mongodb_plugin: needs to reconnect to db: %s',
+                                database
+                            )
+                            time.sleep(5)
                         # Ensure all strings to prevent JSON parse errors.
                         # We typecast on the server
                         for key in status[dbstats_database].keys():
@@ -630,7 +639,6 @@ if __name__ == "__main__":
     import logging
     import sys
     import json
-    import time
     host = '127.0.0.1'
     port = '27017'
 
