@@ -144,7 +144,7 @@ class Mongodb(object):
                     status_output['version']
                 )
 
-            except KeyError, ex:
+            except KeyError as ex:
                 self.checks_logger.error(
                     'mongodb_plugin: version KeyError exception = %s',
                     ex
@@ -174,7 +174,7 @@ class Mongodb(object):
                         'not getting globalLock status'
                     )
 
-            except KeyError, ex:
+            except KeyError as ex:
                 self.checks_logger.error(
                     'mongodb_plugin: globalLock KeyError exception = %s', ex)
 
@@ -186,7 +186,7 @@ class Mongodb(object):
                 status['mem_virtual'] = status_output['mem']['virtual']
                 status['mem_mapped'] = status_output['mem']['mapped']
 
-            except KeyError, ex:
+            except KeyError as ex:
                 self.checks_logger.error(
                     'mongodb_plugin: memory KeyError exception = %s', ex)
 
@@ -199,7 +199,7 @@ class Mongodb(object):
                 status['connections_available'] = \
                     status_output['connections']['available']
 
-            except KeyError, ex:
+            except KeyError as ex:
                 self.checks_logger.error(
                     'mongodb_plugin: connections KeyError exception = %s', ex)
 
@@ -212,7 +212,7 @@ class Mongodb(object):
                 status['extraInfo_pageFaults'] = \
                     status_output['extra_info']['page_faults']
 
-            except KeyError, ex:
+            except KeyError as ex:
                 self.checks_logger.debug(
                     'mongodb_plugin: extra info KeyError exception = %s', ex)
 
@@ -232,7 +232,7 @@ class Mongodb(object):
                 status['backgroundFlushing_flushLengthAvrg'] = \
                     status_output['backgroundFlushing']['average_ms']
 
-            except KeyError, ex:
+            except KeyError as ex:
                 self.checks_logger.debug(
                     'mongodb_plugin: backgroundFlushing KeyError = %s',
                     ex)
@@ -404,7 +404,7 @@ class Mongodb(object):
                         status['lock_percent'] = ((lock_time + highest_lock)
                                                   / float(total_time) * 100.0)
 
-            except KeyError, ex:
+            except KeyError as ex:
                 self.checks_logger.error(
                     'mongodb_plugin: per second metrics KeyError exception = '
                     '%s', ex)
@@ -423,7 +423,7 @@ class Mongodb(object):
                 status['cursors_totalOpen'] = \
                     status_output['cursors']['totalOpen']
 
-            except KeyError, ex:
+            except KeyError as ex:
                 self.checks_logger.error(
                     'mongodb_plugin: cursors KeyError exception = %s', ex)
 
@@ -649,7 +649,7 @@ if __name__ == "__main__":
     while True:
         try:
             result = mongo_check.run()
-            print json.dumps(result, indent=4, sort_keys=True)
+            print(json.dumps(result, indent=4, sort_keys=True))
         except:
             main_checks_logger.exception("Unhandled exception")
         finally:
