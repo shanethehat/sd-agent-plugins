@@ -461,7 +461,8 @@ class Mongodb(object):
 
                 status['replSet_myState'] = repl_set['myState']
 
-                status['replSet_members'] = {}
+                status['replSet'] = {}
+                status['replSet']['members'] = {}
 
                 for member in repl_set['members']:
 
