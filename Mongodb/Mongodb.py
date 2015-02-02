@@ -528,11 +528,12 @@ class Mongodb(object):
                             'mongodb_plugin: executing db.stats() for %s',
                             database
                         )
-
                         dbstats_database = 'dbStats_{0}'.format(database)
                         dbstats_database_namespaces = \
                             'dbStats_{0}_namespaces'.format(database)
-                        try:
+
+                        master = self.connection[database].command('isMaster')
+                        if master['ismaster']:
                             status[dbstats_database] = \
                                 self.connection[database].command('dbstats')
                             namespaces = (
@@ -542,18 +543,16 @@ class Mongodb(object):
                             status[dbstats_database_namespaces] = (
                                 namespaces.count()
                             )
-                        except pymongo.errors.AutoReconnect:
-                            self.checks_logger.warning(
-                                'mongodb_plugin: needs to reconnect to db: %s',
-                                database
+                            for key in status[dbstats_database].keys():
+                                status[dbstats_database][key] = \
+                                    str(status[dbstats_database][key])
+                        else:
+                            self.checks_logger.debug(
+                                'mongodb_plugin: %s is a secondary, dbstats'
+                                ' is only calculated for masters', master['me']
                             )
-                            time.sleep(5)
                         # Ensure all strings to prevent JSON parse errors.
                         # We typecast on the server
-                        for key in status[dbstats_database].keys():
-
-                            status[dbstats_database][key] = \
-                                str(status[dbstats_database][key])
 
         except Exception:
             self.checks_logger.error(
