@@ -292,13 +292,6 @@ class MySQL(object):
                     'qcache hits'])
                 status['qcache hits/s'] = qcache_ps
 
-                select = self.get_db_results(
-                    db, 'SHOW STATUS LIKE "Com_select')
-
-                status['qcache hit rate'] = (
-                    (status['qcache hits'] /
-                        (status['qcache hits'] + select)) * 100)
-
                 status['qcache free memory'] = self.get_db_results(
                     db, 'SHOW STATUS LIKE "Qcache_free_memory"')
 
