@@ -533,9 +533,15 @@ class Mongodb(object):
                             'dbStats_{0}_namespaces'.format(database)
 
                         master = self.connection[database].command('isMaster')
+
+                        status[dbstats_database] = \
+                            self.connection[database].command('dbstats')
+
+                        for key in status[dbstats_database].keys():
+                                status[dbstats_database][key] = \
+                                    str(status[dbstats_database][key])
+
                         if master['ismaster']:
-                            status[dbstats_database] = \
-                                self.connection[database].command('dbstats')
                             namespaces = (
                                 self.connection[database][
                                     'system']['namespaces']
@@ -543,13 +549,11 @@ class Mongodb(object):
                             status[dbstats_database_namespaces] = (
                                 namespaces.count()
                             )
-                            for key in status[dbstats_database].keys():
-                                status[dbstats_database][key] = \
-                                    str(status[dbstats_database][key])
                         else:
                             self.checks_logger.debug(
-                                'mongodb_plugin: %s is a secondary, dbstats'
-                                ' is only calculated for masters', master['me']
+                                'mongodb_plugin: %s is a secondary, can only'
+                                ' count system.namespaces for master',
+                                master['me']
                             )
                         # Ensure all strings to prevent JSON parse errors.
                         # We typecast on the server
