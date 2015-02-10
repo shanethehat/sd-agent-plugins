@@ -52,6 +52,21 @@ class MySQL(object):
             results = cursor.fetchone()[1]
         return results
 
+    def run_query(self, db, query):
+        """Run a query and returns a dictionary with results"""
+        try:
+            cursor = db.cursor()
+            metric = {}
+            for entry in cursor:
+                metric[entry[0]] = entry[1]
+
+            return metric
+        except MySQLdb.OperationalError as message:
+            self.checks_logger(
+                    'mysql: MySQL query error when getting metrics = '.format(
+                        message)
+                )
+
     def calculate_per_s(self, command, result):
         if (not self.datastore.get(command)
                 and self.datastore.get(command) != 0):
@@ -178,6 +193,9 @@ class MySQL(object):
                         message)
                     )
                 return False
+
+            # get show status metrics
+            status_metrics = self.run_query(db, 'SHOW GLOBAL STATUS')
 
             # get Uptime
             try:
