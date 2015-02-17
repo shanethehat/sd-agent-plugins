@@ -56,9 +56,13 @@ class MySQL(object):
         """Run a query and returns a dictionary with results"""
         try:
             cursor = db.cursor()
+            cursor.execute(query)
             metric = {}
             for entry in cursor:
-                metric[entry[0]] = entry[1]
+                try:
+                    metric[entry[0]] = float(entry[1])
+                except ValueError as e:
+                    metric[entry[0]] = entry[1]
 
             return metric
         except MySQLdb.OperationalError as message:
@@ -196,18 +200,10 @@ class MySQL(object):
 
             # get show status metrics
             status_metrics = self.run_query(db, 'SHOW GLOBAL STATUS')
+            status_variables = self.run_query(db, 'SHOW VARIABLES')
 
             # get Uptime
-            try:
-                status['Uptime'] = self.get_db_results(
-                    db, 'SHOW STATUS LIKE "Uptime"'
-                )
-            except MySQLdb.OperationalError as message:
-                self.checks_logger.error(
-                    'mysql: MySQL query error when getting Uptime = {}'.format(
-                        message)
-                )
-                return False
+            status['Uptime'] = status_metrics['Uptime']
             self.checks_logger.debug('mysql: getting Uptime - done')
 
             # Slow queries
@@ -215,184 +211,86 @@ class MySQL(object):
             # need the GLOBAL keyword (case 31015)
             # note, update with slow queries store. making it per second?
             # ask jordi about that.
-            try:
-                if self.version_is_above_5(status):
-                    query = 'SHOW GLOBAL STATUS LIKE "Slow_queries"'
-                else:
-                    query = 'SHOW STATUS LIKE "Slow_queries'
-
-                status['Slow queries'] = self.get_db_results(db, query)
-            except MySQLdb.OperationalError as message:
-                self.checks_logger(
-                    'mysql: MySQL query error when '
-                    'getting Slow_queries = {}'.format(
-                        message)
-                    )
-                return False
+            status['Slow queries'] = status_metrics['Slow_queries']
             self.checks_logger.debug('mysql: getting Slow_queries - done')
 
+            # Note, check for which version of mysql?
+            # try:
+            #     if self.version_is_above_5(status):
+            #         query = 'SHOW GLOBAL STATUS LIKE "Slow_queries"'
+            #     else:
+            #         query = 'SHOW STATUS LIKE "Slow_queries'
+
             # QPS - Queries per second.
-            try:
-                if self.version_is_above_5(status):
-                    query = 'SHOW GLOBAL STATUS LIKE "Queries"'
-                else:
-                    query = 'SHOW STATUS LIKE "Queries"'
-
-                qps = self.calculate_per_s('qps', self.get_db_results(
-                    db, query))
-                status['Queries per second'] = qps
-
-            except MySQLdb.OperationalError as message:
-                self.checks_logger.debug(
-                    'mysql: MySQL query error when getting QPS = {}'.format(
-                        message)
-                )
-                return False
+            status['Queries per second'] = self.calculate_per_s(
+                'qps', status_metrics['Queries']
+            )
+            # Note check for which version of mysql
             self.checks_logger.debug('mysql: getting QPS - done')
 
             # Connection pool
-            try:
-                status['threads connected'] = self.get_db_results(
-                    db, 'SHOW STATUS LIKE "Threads_connected"')
-
-                status['threads running'] = self.get_db_results(
-                    db, 'SHOW STATUS LIKE "Threads_running"')
-
-                status['max connections'] = self.get_db_results(
-                    db, 'SHOW VARIABLES LIKE "max_connections"')
-
-                status['max used connections'] = self.get_db_results(
-                    db, 'SHOW STATUS LIKE "Max_used_connections"')
-
-                status['Connection usage %'] = (
-                    (status['threads running']/status['max connections'])*100
-                )
-
-            except MySQLdb.OperationalError as message:
-                self.checks_logger.error(
-                    'mysql: MySQL query error when '
-                    'getting Threads_connected: {}'.format(
-                        message)
-                )
-                return False
+            status['threads connected'] = status_metrics['Threads_connected']
+            status['threads running'] = status_metrics['Threads_running']
+            status['max connections'] = status_variables['max_connections']
+            status['max used connections'] = status_metrics[
+                'Max_used_connections']
+            status['Connection usage %'] = (
+                (float(status['threads running']) /
+                    float(status['max connections']))*100
+            )
             self.checks_logger.debug('mysql: getting connections - done')
 
             # Buffer pool
-            try:
+            status['buffer pool pages total'] = status_metrics[
+                'Innodb_buffer_pool_pages_total']
+            status['buffer pool pages free'] = status_metrics[
+                'Innodb_buffer_pool_pages_free']
+            status['buffer pool pages dirty'] = status_metrics[
+                'Innodb_buffer_pool_pages_dirty']
+            status['buffer pool pages data'] = status_metrics[
+                'Innodb_buffer_pool_pages_data']
 
-                status['buffer pool pages total'] = self.get_db_results(
-                    db, 'SHOW STATUS LIKE "Innodb_buffer_pool_pages_total"')
-
-                status['buffer pool pages free'] = self.get_db_results(
-                    db, 'SHOW STATUS LIKE "Innodb_buffer_pool_pages_free"')
-
-                status['buffer pool pages dirty'] = self.get_db_results(
-                    db, 'SHOW STATUS LIKE "Innodb_buffer_pool_pages_dirty"')
-
-                status['buffer pool pages data'] = self.get_db_results(
-                    db, 'SHOW STATUS LIKE "Innodb_buffer_pool_pages_data"')
-
-            except MySQLdb.OperationalError as message:
-                self.checks_logger.error(
-                    'mysql: MySQL query error when '
-                    'getting Buffer pool pages = {}'.format(
-                        message)
-                )
-                return False
             self.checks_logger.debug('mysql: getting buffer pool - done')
 
             # Query cache items
-            try:
-                status['qcache hits'] = self.get_db_results(
-                    db, 'SHOW STATUS LIKE "Qcache_hits"')
-
-                qcache_ps = self.calculate_per_s('qcache_ps', status[
-                    'qcache hits'])
-                status['qcache hits/s'] = qcache_ps
-
-                status['qcache free memory'] = self.get_db_results(
-                    db, 'SHOW STATUS LIKE "Qcache_free_memory"')
-
-                status['qcache not cached'] = self.get_db_results(
-                    db, 'SHOW STATUS LIKE "Qcache_not_cached"')
-
-                status['qcache in cache'] = self.get_db_results(
-                    db, 'SHOW STATUS LIKE "Qcache_queries_in_cache"')
-
-            except MySQLdb.OperationalError as message:
-                self.checks_logger.error(
-                    'mysql: MySQL query error when '
-                    'getting Qcache data = {}'.format(
-                        message))
-                return False
+            status['qcache hits'] = status_metrics['Qcache_hits']
+            status['qcache hits/s'] = self.calculate_per_s(
+                'qcache_ps', status['qcache hits'])
+            status['qcache free memory'] = status_metrics['Qcache_free_memory']
+            status['qcache not cached'] = status_metrics['Qcache_not_cached']
+            status['qcache in cache'] = status_metrics[
+                'Qcache_queries_in_cache']
 
             self.checks_logger.debug('mysql: getting Qcache data - done')
 
             # writes, reads, transactions
+            writes = (status_metrics['Com_insert'] +
+                      status_metrics['Com_replace'] +
+                      status_metrics['Com_update'] +
+                      status_metrics['Com_delete'])
+            status['Writes/s'] = self.calculate_per_s('writes', writes)
+
+            # reads
+            reads = status_metrics['Com_select'] + status['qcache hits']
+            status['Reads/s'] = self.calculate_per_s('reads', reads)
+
             try:
-                # writes
-                insert = self.get_db_results(
-                    db, 'SHOW STATUS LIKE "Com_insert"')
+                status['RW ratio'] = reads/writes
+            except ZeroDivisionError:
+                status['RW ratio'] = 0
 
-                replace = self.get_db_results(
-                    db, 'SHOW STATUS LIKE "Com_replace"')
+            # transactions
+            transactions = (status_metrics['Com_commit'] +
+                            status_metrics['Com_rollback'])
+            status['Transactions/s'] = self.calculate_per_s(
+                'transactions', transactions)
 
-                update = self.get_db_results(
-                    db, 'SHOW STATUS LIKE "Com_update"')
-
-                delete = self.get_db_results(
-                    db, 'SHOW STATUS LIKE "Com_delete"')
-
-                writes = insert + replace + update + delete
-                status['Writes/s'] = self.calculate_per_s('writes', writes)
-
-                # reads
-                select = self.get_db_results(
-                    db, 'SHOW STATUS LIKE "Com_select"')
-
-                reads = select + status['qcache hits']
-                status['Reads/s'] = self.calculate_per_s('reads', reads)
-
-                # read write ratio
-                try:
-                    status['RW ratio'] = reads/writes
-                except ZeroDivisionError:
-                    status['RW ratio'] = 0
-
-                # transactions
-                commit = self.get_db_results(
-                    db, 'SHOW STATUS LIKE "Com_commit"')
-
-                rollback = self.get_db_results(
-                    db, 'SHOW STATUS LIKE "Com_rollback"')
-
-                transactions = commit + rollback
-                status['Transactions/s'] = self.calculate_per_s(
-                    'transactions', transactions)
-
-            except MySQLdb.OperationalError as message:
-                self.checks_logger.error(
-                    'mysql: MySQL query error when getting writes,'
-                    ' reads and transactions = {}'.format(
-                        message)
-                )
-                return False
+            self.checks_logger.debug(
+                'mysql: getting transactions, reads and writes - done')
 
             # Aborted connections and clients
-            try:
-                status['aborted clients'] = self.get_db_results(
-                    db, 'SHOW STATUS LIKE "Aborted_clients"')
-
-                status['aborted connects'] = self.get_db_results(
-                    db, 'SHOW STATUS LIKE "Aborted_connects"')
-
-            except MySQLdb.OperationalError as message:
-                self.checks_logger.error(
-                    'mysql: MySQL query error when '
-                    'getting aborted items = {}'.format(
-                        message)
-                )
-                return False
+            status['aborted clients'] = status_metrics['Aborted_clients']
+            status['aborted connects'] = status_metrics['Aborted_connects']
 
             self.checks_logger.debug(
                 'mysql: getting aborted connections - done')
@@ -406,7 +304,7 @@ class MySQL(object):
 
             except MySQLdb.OperationalError as message:
 
-                self.mainLogger.error(
+                self.checks_logger.error(
                     'getMySQLStatus: MySQL query error when '
                     'getting SHOW SLAVE STATUS = %s', message)
                 result = None
@@ -419,116 +317,56 @@ class MySQL(object):
                     else:
                         secondsBehindMaster = result['Seconds_Behind_Master']
 
-                    self.mainLogger.debug(
+                    self.checks_logger.debug(
                         'getMySQLStatus: '
                         'secondsBehindMaster = %s', secondsBehindMaster
                     )
 
                 except IndexError as e:
-                    self.mainLogger.debug(
+                    self.checks_logger.debug(
                         'getMySQLStatus: secondsBehindMaster empty. %s', e
                     )
 
             else:
-                self.mainLogger.debug(
+                self.checks_logger.debug(
                     'getMySQLStatus: secondsBehindMaster empty. Result = None.'
                 )
 
             # Created temporary tables in memory and on disk
-            try:
-                if self.version_is_above_5(status):
-                    query = 'SHOW GLOBAL STATUS LIKE "Created_tmp_tables"'
-                else:
-                    query = 'SHOW STATUS LIKE "Created_tmp_tables"'
-                status['created tmp tables'] = self.get_db_results(
-                    db, query)
-
-                if self.version_is_above_5(status):
-                    query = 'SHOW GLOBAL STATUS LIKE "Created_tmp_disk_tables"'
-                else:
-                    query = 'SHOW STATUS LIKE "Created_tmp_disk_tables"'
-                status['created tmp tables on disk'] = self.get_db_results(
-                    db, query)
-
-            except MySQLdb.OperationalError as message:
-                self.checks_logger.error(
-                    'mysql: MySQL query error when '
-                    'getting temp tables = {}'.format(
-                        message)
-                )
-                return False
+            status['created tmp tables'] = status_metrics['Created_tmp_tables']
+            status['created tmp tables on disk'] = status_metrics[
+                'Created_tmp_disk_tables']
+            # Note check mysql version?
             self.checks_logger.debug(
                 'mysql: getting temporary tables data - done')
 
             # select_full_join
-            try:
-                if self.version_is_above_5(status):
-                    query = 'SHOW GLOBAL STATUS LIKE "Select_full_join"'
-                else:
-                    query = 'SHOW STATUS LIKE "Select_full_join"'
-                status['select full join'] = self.get_db_results(
-                    db, query)
-
-            except MySQLdb.OperationalError as message:
-                self.checks_logger.error(
-                    'mysql: MySQL query error when '
-                    'getting select full join = {}'.format(
-                        message)
-                )
-                return False
+            status['select full join'] = status_metrics['Select_full_join']
+            # note check for mysql version?
             self.checks_logger.debug('mysql: getting select_full_join - done')
 
             # slave_running
-            try:
-                result = self.get_db_results(
-                    db, 'SHOW STATUS LIKE "Slave_running"')
-                if result == 'OFF':
-                    result = 0
-                else:
-                    result = 1
-                status['slave running'] = result
-            except MySQLdb.OperationalError as message:
-                self.checks_logger.error(
-                    'mysql: MySQL query error when '
-                    'getting slave_running = {}'.format(
-                        message)
-                )
-                return False
+            result = status_metrics['Slave_running']
+            if result == 'OFF':
+                result = 0
+            else:
+                result = 1
+            status['slave running'] = result
             self.checks_logger.debug(
                 'mysql: getting slave_running - done')
 
             # open files
-            try:
-                status['open files'] = self.get_db_results(
-                    db, 'SHOW STATUS LIKE "Open_files"')
-
-                status['open files limit'] = self.get_db_results(
-                    db, 'SHOW VARIABLES LIKE "open_files_limit"')
-
-            except MySQLdb.OperationalError as message:
-                self.checks_logger.error(
-                    'mysql: MySQL query error when '
-                    'getting open files = {}'.format(
-                        message)
-                )
-                return False
+            status['open files'] = status_metrics['Open_files']
+            status['open files limit'] = status_variables['open_files_limit']
             self.checks_logger.debug('mysql: getting open_files - done')
 
             # table_locks_waited
-            try:
-                status['table locks waited'] = self.get_db_results(
-                    db, 'SHOW STATUS LIKE "Table_locks_waited"')
-            except MySQLdb.OperationalError as message:
-                self.checks_logger.error(
-                    'mysql: MySQL query error when '
-                    'getting table locks waited = {}'.format(
-                        message)
-                )
-                return False
+            status['table locks waited'] = status_metrics['Table_locks_waited']
             self.checks_logger.debug(
                 'mysql: getting table_locks_waited - done')
 
             # checkpoint age
+            # note this needs to be changed.
             try:
                 cursor = db.cursor()
                 cursor.execute('SHOW ENGINE INNODB STATUS')
@@ -554,6 +392,7 @@ class MySQL(object):
             self.checks_logger.debug(
                 'mysql: getting checkpoint age - done')
 
+            # note remove this.
             try:
                 # Key cache hit ratio
                 # http://www.percona.com/blog/2010/02/28/why-you-should-ignore-mysqls-key-cache-hit-ratio/
@@ -563,8 +402,8 @@ class MySQL(object):
                 key_requests = self.get_db_results(
                     db, 'SHOW STATUS LIKE "Key_read_requests"')
 
-                status['Key cache hit ratio'] = (
-                    100 - ((key_read * 100) / key_requests))
+                # status['Key cache hit ratio'] = (
+                #     100 - ((key_read * 100) / key_requests))
 
                 status['Key reads/s'] = self.calculate_per_s(
                     "Key_reads", key_read)
@@ -580,49 +419,29 @@ class MySQL(object):
                 'mysql: getting key cache hit ratio - done')
 
             # com commands per second
-            try:
-                com = self.raw_config['MySQLServer'].get('mysql_include_per_s')
-                if com:
-                    user_com_ps = com
-                    user_com_ps = user_com_ps.split(',')
-                    user_com_ps = [command.strip() for command in user_com_ps]
-                    user_com_ps = user_com_ps + COMMANDS
-                else:
-                    user_com_ps = COMMANDS
 
-                for command in user_com_ps:
-                    if self.version_is_above_5(status):
-                        query = 'SHOW GLOBAL STATUS LIKE "{}"'.format(command)
-                    else:
-                        query = 'SHOW STATUS LIKE "{}"'.format(command)
-                    com_per_s = self.calculate_per_s(
-                        command, self.get_db_results(db, query)
-                    )
-                    status[command.replace('_', ' ')+'/s'] = com_per_s
+            com = self.raw_config['MySQLServer'].get('mysql_include_per_s')
+            if com:
+                user_com_ps = com
+                user_com_ps = user_com_ps.split(',')
+                user_com_ps = [command.strip() for command in user_com_ps]
+                user_com_ps = user_com_ps + COMMANDS
+            else:
+                user_com_ps = COMMANDS
 
-                if self.raw_config['MySQLServer'].get('mysql_include'):
-                    user_com = self.raw_config['MySQLServer']['mysql_include']
-                    user_com = user_com.split(',')
-                    user_com = [command.strip() for command in user_com]
+            for command in user_com_ps:
+                com_per_s = self.calculate_per_s(
+                    command, status_metrics[command])
+                status[command.replace('_', ' ')+'/s'] = com_per_s
 
-                    for command in user_com:
-                        if self.version_is_above_5(status):
-                            query = 'SHOW GLOBAL STATUS LIKE "{}"'.format(
-                                command)
-                        else:
-                            query = 'SHOW STATUS LIKE "{}"'.format(command)
-                        com_per_s = self.calculate_per_s(
-                            command, self.get_db_results(db, query)
-                        )
-                        status[command.replace('_', ' ')+'/s'] = com_per_s
+            if self.raw_config['MySQLServer'].get('mysql_include'):
+                user_com = self.raw_config['MySQLServer']['mysql_include']
+                user_com = user_com.split(',')
+                user_com = [command.strip() for command in user_com]
 
-            except MySQLdb.OperationalError as message:
-                self.checks_logger.error(
-                    'mysql: MySQL query error when '
-                    'getting com commands = {}'.format(
-                        message)
-                )
-                return False
+                for command in user_com:
+                    status[command.replace('_', ' ')] = status_metrics[
+                        command]
             self.checks_logger.debug(
                 'mysql: getting com_commands - done')
 
