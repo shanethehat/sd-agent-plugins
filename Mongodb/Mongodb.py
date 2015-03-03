@@ -401,7 +401,7 @@ class Mongodb(object):
                                 if time_locked > highest_lock:
                                     highest_lock = time_locked
                         status['lock_percent'] = ((lock_time + highest_lock) /
-                            float(total_time) * 100.0)
+                                                  float(total_time) * 100.0)
 
             except KeyError as ex:
                 self.checks_logger.error(
@@ -509,8 +509,8 @@ class Mongodb(object):
 
             # db.stats()
             if ('mongodb_plugin_dbstats' in self.raw_config['MongoDB'] and
-                     self.raw_config['MongoDB']['mongodb_plugin_dbstats'] ==
-                        'yes'):
+                    self.raw_config['MongoDB']['mongodb_plugin_dbstats'] ==
+                    'yes'):
                 self.checks_logger.debug('mongodb_plugin: get db.stats() too')
 
                 for database in self.connection.database_names():
