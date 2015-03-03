@@ -114,6 +114,7 @@ class ZooKeeper(object):
         zk_open_file_descriptor_count 37
         zk_max_file_descriptor_count 10240
         """
+        data['zk_server_state'] = -1
 
         for line in reply.split('\n'):
             if not line:
@@ -127,8 +128,10 @@ class ZooKeeper(object):
             if key == 'zk_server_state':
                 if value == 'standalone':
                     value = 0
-                else:
+                elif value == 'leader':
                     value = 1
+                elif value == 'follower':
+                    value = 2
 
             data[key] = int(value)
 
