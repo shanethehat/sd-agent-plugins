@@ -187,8 +187,7 @@ class Temperature(object):
                 except Exception as exception:
                     self.checks_logger.error(
                         'Unable to extract temperature from smartctl.'
-                        + 'Error: {0}'
-                        .format(exception.message))
+                        'Error: {0}'.format(exception.message))
         return data
 
 

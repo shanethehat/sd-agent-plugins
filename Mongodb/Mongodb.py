@@ -52,9 +52,9 @@ class Mongodb(object):
         self.connection = None
 
     def preliminaries(self):
-        if ('MongoDB' not in self.raw_config
-                or 'mongodb_plugin_server' not in self.raw_config['MongoDB']
-                or self.raw_config['MongoDB']['mongodb_plugin_server'] == ''):
+        if ('MongoDB' not in self.raw_config or
+                'mongodb_plugin_server' not in self.raw_config['MongoDB'] or
+                self.raw_config['MongoDB']['mongodb_plugin_server'] == ''):
             self.checks_logger.debug('mongodb_plugin: config not set')
             return False
 
@@ -223,8 +223,7 @@ class Mongodb(object):
                 self.checks_logger.debug('mongodb_plugin: backgroundFlushing')
 
                 delta = (
-                    datetime.datetime.utcnow()
-                    -
+                    datetime.datetime.utcnow() -
                     status_output['backgroundFlushing']['last_finished']
                 )
                 status['backgroundFlushing_secondsSinceLastFlush'] = \
@@ -256,29 +255,27 @@ class Mongodb(object):
                     if (split_version[0] <= 2) and (split_version[1] < 4):
 
                         accesses_ps = float(
-                            status_output['indexCounters']['btree']['accesses']
-                            -
+                            status_output[
+                                'indexCounters']['btree']['accesses'] -
                             self.mongo_DB_store['indexCounters']['accessesPS']
                         ) / 60
 
                         if accesses_ps >= 0:
                             status['indexCounters_accessesPS'] = accesses_ps
                             status['indexCounters_hitsPS'] = float(
-                                status_output['indexCounters']['btree']['hits']
-                                -
+                                status_output[
+                                    'indexCounters']['btree']['hits'] -
                                 self.mongo_DB_store['indexCounters']['hitsPS']
                             ) / 60
                             status['indexCounters_missesPS'] = float(
-                                status_output['indexCounters']
-                                ['btree']['misses']
-                                -
+                                status_output[
+                                    'indexCounters']['btree']['misses'] -
                                 self.mongo_DB_store['indexCounters']
                                 ['missesPS']
                             ) / 60
                             status['indexCounters_missRatioPS'] = float(
-                                status_output['indexCounters']
-                                ['btree']['missRatio']
-                                -
+                                status_output[
+                                    'indexCounters']['btree']['missRatio'] -
                                 self.mongo_DB_store['indexCounters']
                                 ['missRatioPS']
                             ) / 60
@@ -361,8 +358,8 @@ class Mongodb(object):
                             (lock_time / total_time) * 100.0
                         highest_lock = 0
                         for database_name in status_output['locks'].keys():
-                            if (database_name in self.mongo_DB_store['locks']
-                                    and
+                            if (database_name in self.mongo_DB_store[
+                                    'locks'] and
                                     database_name in status_output['locks']):
                                 if 'r' in (
                                         status_output['locks'][database_name]
@@ -403,8 +400,8 @@ class Mongodb(object):
                                 time_locked = time_locked_r + time_locked_w
                                 if time_locked > highest_lock:
                                     highest_lock = time_locked
-                        status['lock_percent'] = ((lock_time + highest_lock)
-                                                  / float(total_time) * 100.0)
+                        status['lock_percent'] = ((lock_time + highest_lock) /
+                                                  float(total_time) * 100.0)
 
             except KeyError as ex:
                 self.checks_logger.error(
@@ -431,8 +428,7 @@ class Mongodb(object):
 
             # Replica set status
             if (
-                'mongodb_plugin_replset' in self.raw_config['MongoDB']
-                and
+                'mongodb_plugin_replset' in self.raw_config['MongoDB'] and
                 self.raw_config['MongoDB']['mongodb_plugin_replset'] == 'yes'
             ):
                 self.checks_logger.debug(
@@ -512,17 +508,17 @@ class Mongodb(object):
                             ['error']) = member['errmsg']
 
             # db.stats()
-            if ('mongodb_plugin_dbstats' in self.raw_config['MongoDB']
-                    and self.raw_config['MongoDB']['mongodb_plugin_dbstats'] ==
+            if ('mongodb_plugin_dbstats' in self.raw_config['MongoDB'] and
+                    self.raw_config['MongoDB']['mongodb_plugin_dbstats'] ==
                     'yes'):
                 self.checks_logger.debug('mongodb_plugin: get db.stats() too')
 
                 for database in self.connection.database_names():
 
-                    if (database != 'config'
-                            and database != 'local'
-                            and database != 'admin'
-                            and database != 'test'):
+                    if (database != 'config' and
+                            database != 'local' and
+                            database != 'admin' and
+                            database != 'test'):
 
                         self.checks_logger.debug(
                             'mongodb_plugin: executing db.stats() for %s',
@@ -602,9 +598,9 @@ class Mongodb(object):
             self.mongo_DB_store['indexCounters']['missRatioPS'] = \
                 status_output['indexCounters']['missRatio']
 
-        if ('globalLock' in status_output
-                and 'totalTime' in status_output['globalLock']
-                and 'lockTime' in status_output['globalLock']):
+        if ('globalLock' in status_output and
+                'totalTime' in status_output['globalLock'] and
+                'lockTime' in status_output['globalLock']):
             self.mongo_DB_store['globalLock'] = {}
             self.mongo_DB_store['globalLock']['totalTime'] = \
                 status_output['globalLock']['totalTime']
