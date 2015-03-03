@@ -52,9 +52,9 @@ class Mongodb(object):
         self.connection = None
 
     def preliminaries(self):
-        if ('MongoDB' not in self.raw_config
-                or 'mongodb_plugin_server' not in self.raw_config['MongoDB']
-                or self.raw_config['MongoDB']['mongodb_plugin_server'] == ''):
+        if ('MongoDB' not in self.raw_config or
+                'mongodb_plugin_server' not in self.raw_config['MongoDB'] or
+                self.raw_config['MongoDB']['mongodb_plugin_server'] == ''):
             self.checks_logger.debug('mongodb_plugin: config not set')
             return False
 
@@ -223,8 +223,7 @@ class Mongodb(object):
                 self.checks_logger.debug('mongodb_plugin: backgroundFlushing')
 
                 delta = (
-                    datetime.datetime.utcnow()
-                    -
+                    datetime.datetime.utcnow() -
                     status_output['backgroundFlushing']['last_finished']
                 )
                 status['backgroundFlushing_secondsSinceLastFlush'] = \
@@ -256,29 +255,27 @@ class Mongodb(object):
                     if (split_version[0] <= 2) and (split_version[1] < 4):
 
                         accesses_ps = float(
-                            status_output['indexCounters']['btree']['accesses']
-                            -
+                            status_output[
+                                'indexCounters']['btree']['accesses'] -
                             self.mongo_DB_store['indexCounters']['accessesPS']
                         ) / 60
 
                         if accesses_ps >= 0:
                             status['indexCounters_accessesPS'] = accesses_ps
                             status['indexCounters_hitsPS'] = float(
-                                status_output['indexCounters']['btree']['hits']
-                                -
+                                status_output[
+                                    'indexCounters']['btree']['hits'] -
                                 self.mongo_DB_store['indexCounters']['hitsPS']
                             ) / 60
                             status['indexCounters_missesPS'] = float(
-                                status_output['indexCounters']
-                                ['btree']['misses']
-                                -
+                                status_output[
+                                    'indexCounters']['btree']['misses']  -
                                 self.mongo_DB_store['indexCounters']
                                 ['missesPS']
                             ) / 60
                             status['indexCounters_missRatioPS'] = float(
-                                status_output['indexCounters']
-                                ['btree']['missRatio']
-                                -
+                                status_output[
+                                    'indexCounters']['btree']['missRatio'] -
                                 self.mongo_DB_store['indexCounters']
                                 ['missRatioPS']
                             ) / 60
