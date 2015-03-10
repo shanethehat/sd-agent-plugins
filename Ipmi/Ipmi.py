@@ -37,7 +37,7 @@ class Ipmi(object):
             return False
 
         proc = subprocess.Popen(
-            ['ipmitool', 'sensor'],
+            ['sudo','ipmitool', 'sensor'],
             stdout=subprocess.PIPE,
             close_fds=True)
 
@@ -55,18 +55,26 @@ class Ipmi(object):
         if self.raw_config['Ipmi']['fans'] == 'yes':
             data.update(self.process_fans())
 
+        if self.raw_config['Ipmi']['powersupply'] == 'yes':
+            data.update(self.process_powersupply())
+
         return data
 
     def process_cpus(self):
         """Collect temperatures from all available CPUs"""
         data = {}
 
-        cpu_matcher = re.compile(r'^CPU(\d+)\sTemp').match
+        cpu_matcher = re.compile(r'^CPU(\d*)\sTemp').match
 
         for sensor in self.sensors.split("\n"):
             match = cpu_matcher(sensor)
             if match:
-                data['temp-cpu-{0}'.format(match.group(1))] = sensor.split('|')[1].strip()
+                if match.group(1):
+                    cpu_num = match.group(1)
+                else:
+                    cpu_num = 1
+
+                data['temp-cpu-{0}'.format(cpu_num)] = float(sensor.split('|')[1].strip())
 
         return data
 
@@ -76,7 +84,7 @@ class Ipmi(object):
 
         for sensor in self.sensors.split("\n"):
             if sensor.startswith('System Temp'):
-                data['temp-system'] = sensor.split('|')[1].strip()
+                data['temp-system'] = float(sensor.split('|')[1].strip())
 
         return data
 
@@ -86,7 +94,7 @@ class Ipmi(object):
 
         for sensor in self.sensors.split("\n"):
             if sensor.startswith('Peripheral Temp'):
-                data['temp-peripheral'] = sensor.split('|')[1].strip()
+                data['temp-peripheral'] = float(sensor.split('|')[1].strip())
 
         return data
 
@@ -95,14 +103,29 @@ class Ipmi(object):
         """Collect speed from all available Fans"""
         data = {}
 
-        fan_matcher = re.compile(r'^FAN(\d+)').match
+        fan_matcher = re.compile(r'^FAN(\w+)').match
 
         for sensor in self.sensors.split("\n"):
             match = fan_matcher(sensor)
             if match:
                 columns = sensor.split('|')
                 if columns[1].strip() != 'na':
-                    data['speed-fan-{0}'.format(match.group(1))] = columns[1].strip()
+                    data['speed-fan-{0}'.format(match.group(1))] = float(columns[1].strip())
+
+        return data
+
+    def process_powersupply(self):
+        """Collect power supply status"""
+        data = {}
+
+        ps_matcher = re.compile(r'^PS(\d+) Status').match
+
+        for sensor in self.sensors.split("\n"):
+            match = ps_matcher(sensor)
+            if match:
+                columns = sensor.split('|')
+                if columns[1].strip() != 'na':
+                    data['power-supply-{0}'.format(match.group(1))] = int(columns[1].strip(), 16)
 
         return data
 
@@ -116,6 +139,7 @@ if __name__ == '__main__':
             'system': 'yes',
             'peripheral': 'yes',
             'fans': 'yes',
+            'powersupply': 'yes',
         }
     }
 
