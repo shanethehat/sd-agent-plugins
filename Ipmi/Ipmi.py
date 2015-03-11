@@ -38,7 +38,7 @@ class Ipmi(object):
             return False
 
         proc = subprocess.Popen(
-            ['sudo','ipmitool', 'sensor'],
+            ['sudo', 'ipmitool', 'sensor'],
             stdout=subprocess.PIPE,
             close_fds=True)
 
@@ -71,11 +71,11 @@ class Ipmi(object):
             match = cpu_matcher(sensor)
             if match:
                 if match.group(1):
-                    cpu_num = match.group(1)
+                    key = 'temp-cpu-{0}'.format(match.group(1))
                 else:
-                    cpu_num = 1
+                    key = 'temp-cpu-1'
 
-                data['temp-cpu-{0}'.format(cpu_num)] = float(sensor.split('|')[1].strip())
+                data[key] = float(sensor.split('|')[1].strip())
 
         return data
 
@@ -99,7 +99,6 @@ class Ipmi(object):
 
         return data
 
-
     def process_fans(self):
         """Collect speed from all available Fans"""
         data = {}
@@ -111,7 +110,8 @@ class Ipmi(object):
             if match:
                 columns = sensor.split('|')
                 if columns[1].strip() != 'na':
-                    data['speed-fan-{0}'.format(match.group(1))] = float(columns[1].strip())
+                    key = 'speed-fan-{0}'.format(match.group(1))
+                    data[key] = float(columns[1].strip())
 
         return data
 
@@ -126,7 +126,8 @@ class Ipmi(object):
             if match:
                 columns = sensor.split('|')
                 if columns[1].strip() != 'na':
-                    data['power-supply-{0}'.format(match.group(1))] = int(columns[1].strip(), 16)
+                    key = 'power-supply-{0}'.format(match.group(1))
+                    data[key] = int(columns[1].strip(), 16)
 
         return data
 
