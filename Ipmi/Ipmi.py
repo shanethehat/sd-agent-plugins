@@ -19,6 +19,7 @@ import time
 class Ipmi(object):
     """SD Plugin for reading available data from the machines IPMI board sensors.
 
+    Requires sudo permissions to run 'ipmitool sensor'.
     We need tools to be installed to query the IPMI interface:
 
     * ipmitool - http://ipmitool.sourceforge.net/
