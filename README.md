@@ -1,7 +1,7 @@
 Server Density Plugins
 ===
 
-These plugins are made freely available for various applications. [See the full list on our website](https://www.serverdensity.com/plugins).
+These plugins are made freely available for various applications.
 
 Configuring the agent
 ---
