@@ -47,7 +47,7 @@ class PortMon(object):
             #s.recv(0)
             s.close()
         except (socket.error, socket.timeout):
-            return None
+            return 'down'
         return ret
         
         
