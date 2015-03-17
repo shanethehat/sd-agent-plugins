@@ -66,9 +66,9 @@ class MySQL(object):
 
             return metric
         except MySQLdb.OperationalError as message:
-            self.checks_logger(
-                    'mysql: MySQL query error when getting metrics = '.format(
-                        message)
+            self.checks_logger.debug(
+                'mysql: MySQL query error when getting metrics = '.format(
+                    message)
                 )
 
     def calculate_per_s(self, command, result):
@@ -150,7 +150,7 @@ class MySQL(object):
             self.checks_logger.error(
                 'Unable to connect to MySQL server {0}'
                 ' - Exception: {1}'.format(
-                    self.config_raw['MySQLServer']['mysql_server'],
+                    self.raw_config['MySQLServer']['mysql_server'],
                     traceback.format_exc())
                 )
             return False
