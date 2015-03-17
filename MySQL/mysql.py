@@ -23,6 +23,14 @@ COMMANDS = [
     'Com_commit',
     'Questions',
     'Com_rollback',
+    'Handler_commit',
+    'Handler_delete',
+    'Handler_delete',
+    'Handler_update',
+    'Handler_write',
+    'Handler_rollback',
+    'Handler_read_first',
+    'Handler_read_rnd',
 ]
 
 
