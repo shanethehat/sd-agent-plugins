@@ -59,6 +59,18 @@ Fill out the details for each line for a MySQL user. Your `mysql_server` will ge
     mysql_user: my_username
     mysql_pass: my_password
 
+### Connecting through SSL
+If you want to connect to the server via SSL you have to set the following to parameters. There are instructions on how to create SSL certificates in [MySQL manual](http://dev.mysql.com/doc/refman/5.5/en/creating-ssl-certs.html)
+    
+    mysql_ssl_cert: /path/to/cert.pem
+    mysql_ssl_key: /path/to/key.pem
+
+You'll also have to add the following lines to your `my.cnf` file.
+    
+    ssl-ca=/etc/mysql-ssl/ca-cert.pem
+    ssl-cert=/etc/mysql-ssl/server-cert.pem
+    ssl-key=/etc/mysql-ssl/server-key.pem
+
 ### Custom ports and sockets
 You can specify a custom port and/or socket if you are not running the default. You do this by adding 2 new config options to the config file underneath the existing options e.g, the default port is `3306`: 
 
