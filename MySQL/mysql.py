@@ -513,7 +513,9 @@ if __name__ == "__main__":
             'mysql_port': port,
             'mysql_user': 'jonathan',
             'mysql_pass': 'password',
-            'mysql_include_per_s': 'Com_check, Com_checksum, Com_begin'
+            'mysql_include_per_s': 'Com_check, Com_checksum, Com_begin',
+            # 'mysql_ssl_cert': '/etc/mysql-ssl/client-cert.pem',
+            # 'mysql_ssl_key': '/etc/mysql-ssl/client-key.pem'
         }
     }
 
