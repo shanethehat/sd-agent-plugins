@@ -176,7 +176,8 @@ class MySQL(object):
                 self.connection = db
                 self.checks_logger.error('mysql: Connected to DB via SSL')
             else:
-                self.checks_logger.debug('mysql: Trying to connect via password')
+                self.checks_logger.debug(
+                    'mysql: Trying to connect via password')
                 db = MySQLdb.connect(
                     host=self.raw_config['MySQLServer']['mysql_server'],
                     user=self.raw_config['MySQLServer']['mysql_user'],
@@ -184,7 +185,8 @@ class MySQL(object):
                     port=int(self.raw_config['MySQLServer']['mysql_port'])
                     )
                 self.connection = db
-                self.checks_logger.debug('mysql: Connected to DB with password')
+                self.checks_logger.debug(
+                    'mysql: Connected to DB with password')
             # note, how do I take into account the socket?
         except Exception:
             self.checks_logger.error(
