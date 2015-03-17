@@ -128,6 +128,19 @@ class MySQL(object):
                 self.checks_logger.error(
                     "mysql: MySQL connection error: {}".format(message))
                 return False
+        elif (self.raw_config['MySQLServer'].get('mysql_ssl_cert')
+                and self.raw_config['MySQLServer'].get('mysql_ssl_key')):
+            ssl = {
+                'cert': self.raw_config['MySQLServer']['mysql_ssl_cert'],
+                'key': self.raw_config['MySQLServer']['mysql_ssl_key']
+            }
+            MySQLdb.connect(
+                host=self.raw_config['MySQLServer']['mysql_server'],
+                user=self.raw_config['MySQLServer']['mysql_user'],
+                passwd=self.raw_config['MySQLServer']['mysql_pass'],
+                port=int(self.raw_config['MySQLServer']['mysql_port']),
+                ssl=ssl
+            )
         else:
             # Connect
             try:
@@ -146,13 +159,32 @@ class MySQL(object):
     def get_connection(self):
         try:
             # connection
-            db = MySQLdb.connect(
-                host=self.raw_config['MySQLServer']['mysql_server'],
-                user=self.raw_config['MySQLServer']['mysql_user'],
-                passwd=self.raw_config['MySQLServer']['mysql_pass'],
-                port=int(self.raw_config['MySQLServer']['mysql_port'])
+            if (self.raw_config['MySQLServer'].get('mysql_ssl_cert')
+                    and self.raw_config['MySQLServer'].get('mysql_ssl_key')):
+                self.checks_logger.debug('mysql: Trying to connect via SSL')
+                ssl = {
+                    'cert': self.raw_config['MySQLServer']['mysql_ssl_cert'],
+                    'key': self.raw_config['MySQLServer']['mysql_ssl_key']
+                }
+                db = MySQLdb.connect(
+                    host=self.raw_config['MySQLServer']['mysql_server'],
+                    user=self.raw_config['MySQLServer']['mysql_user'],
+                    passwd=self.raw_config['MySQLServer']['mysql_pass'],
+                    port=int(self.raw_config['MySQLServer']['mysql_port']),
+                    ssl=ssl
                 )
-            self.connection = db
+                self.connection = db
+                self.checks_logger.error('mysql: Connected to DB via SSL')
+            else:
+                self.checks_logger.debug('mysql: Trying to connect via password')
+                db = MySQLdb.connect(
+                    host=self.raw_config['MySQLServer']['mysql_server'],
+                    user=self.raw_config['MySQLServer']['mysql_user'],
+                    passwd=self.raw_config['MySQLServer']['mysql_pass'],
+                    port=int(self.raw_config['MySQLServer']['mysql_port'])
+                    )
+                self.connection = db
+                self.checks_logger.debug('mysql: Connected to DB with password')
             # note, how do I take into account the socket?
         except Exception:
             self.checks_logger.error(
@@ -243,8 +275,8 @@ class MySQL(object):
             status['max used connections'] = status_metrics[
                 'Max_used_connections']
             status['Connection usage %'] = (
-                (float(status['threads running']) /
-                    float(status['max connections']))*100
+                (status['threads running'] /
+                    status['max connections'])*100
             )
             self.checks_logger.debug('mysql: getting connections - done')
 
@@ -446,6 +478,9 @@ class MySQL(object):
                 user_com = self.raw_config['MySQLServer']['mysql_include']
                 user_com = user_com.split(',')
                 user_com = [command.strip() for command in user_com]
+                user_com = user_com + COMMANDS
+            else:
+                user_com = COMMANDS
 
                 for command in user_com:
                     status[command.replace('_', ' ')] = status_metrics[
