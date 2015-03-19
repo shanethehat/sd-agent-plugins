@@ -56,7 +56,9 @@ class BackupNinja(object):
                     '{0} {1}'.format(now.year, entry_datestr),
                     '%Y %b %d %H:%M:%S')
                 diff_date = now - entry_datetime
-                data['age'] = int(round(diff_date.total_seconds() / 60))
+                total_seconds = (
+                    diff_date.seconds + diff_date.days * 24 * 3600)
+                data['age'] = int(round(total_seconds / 60))
                 data['actions'] = match.group(2)
                 data['fatal'] = match.group(3)
                 data['error'] = match.group(4)
