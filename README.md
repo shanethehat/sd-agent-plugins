@@ -18,4 +18,4 @@ Troubleshooting plugins
 
 You can see what is being sent back to us from the "Plugins" tab when viewing the device in the Server Density web UI.
 
-If you have problems, [e-mail us](hello@serverdensity.com).
+If you have problems, <a href="mailto:hello@serverdensity.com">email us</a>.
