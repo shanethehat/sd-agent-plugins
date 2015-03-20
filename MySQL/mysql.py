@@ -44,8 +44,8 @@ class MySQL(object):
         self.datastore = {}
 
     def version_is_above_5(self, status):
-        if (int(status['version'][0]) >= 5
-                and int(status['version'][2]) >= 2):
+        if (int(status['version'][0]) >= 5 and
+                int(status['version'][2]) >= 2):
             return True
         else:
             return False
@@ -80,8 +80,8 @@ class MySQL(object):
                 )
 
     def calculate_per_s(self, command, result):
-        if (not self.datastore.get(command)
-                and self.datastore.get(command) != 0):
+        if (not self.datastore.get(command) and
+                self.datastore.get(command) != 0):
             self.checks_logger.debug(
                 'mysql: Datastore unset for '
                 '{}, storing for first time'.format(command))
@@ -95,11 +95,11 @@ class MySQL(object):
         return com_per_s
 
     def preliminaries(self):
-        if ('MySQLServer' not in self.raw_config
-                and 'mysql_server' not in self.raw_config['MySQLServer']
-                or self.raw_config['MySQLServer']['mysql_server'] == ''
-                or self.raw_config['MySQLServer']['mysql_user'] == ''
-                or self.raw_config['MySQLServer']['mysql_pass'] == ''):
+        if ('MySQLServer' not in self.raw_config and
+                'mysql_server' not in self.raw_config['MySQLServer'] or
+                self.raw_config['MySQLServer']['mysql_server'] == '' or
+                self.raw_config['MySQLServer']['mysql_user'] == '' or
+                self.raw_config['MySQLServer']['mysql_pass'] == ''):
             self.checks_logger.debug('mysql: config not set')
             return False
 
@@ -128,8 +128,8 @@ class MySQL(object):
                 self.checks_logger.error(
                     "mysql: MySQL connection error: {}".format(message))
                 return False
-        elif (self.raw_config['MySQLServer'].get('mysql_ssl_cert')
-                and self.raw_config['MySQLServer'].get('mysql_ssl_key')):
+        elif (self.raw_config['MySQLServer'].get('mysql_ssl_cert') and
+                self.raw_config['MySQLServer'].get('mysql_ssl_key')):
             ssl = {
                 'cert': self.raw_config['MySQLServer']['mysql_ssl_cert'],
                 'key': self.raw_config['MySQLServer']['mysql_ssl_key']
@@ -159,8 +159,8 @@ class MySQL(object):
     def get_connection(self):
         try:
             # connection
-            if (self.raw_config['MySQLServer'].get('mysql_ssl_cert')
-                    and self.raw_config['MySQLServer'].get('mysql_ssl_key')):
+            if (self.raw_config['MySQLServer'].get('mysql_ssl_cert') and
+                    self.raw_config['MySQLServer'].get('mysql_ssl_key')):
                 self.checks_logger.debug('mysql: Trying to connect via SSL')
                 ssl = {
                     'cert': self.raw_config['MySQLServer']['mysql_ssl_cert'],
