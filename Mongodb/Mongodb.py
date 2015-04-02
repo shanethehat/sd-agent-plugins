@@ -6,7 +6,7 @@ https://www.serverdensity.com/plugins/mongodb/
 https://github.com/serverdensity/sd-agent-plugins/
 
 
-Version: 1.0.0
+Version: 1.1.0
 """
 
 import collections
@@ -280,9 +280,9 @@ class Mongodb(object):
                                 ['missRatioPS']
                             ) / 60
 
-                    elif ((split_version[0] == 2) and (split_version[1] >= 4)
-                            or (split_version[0] == 3)):
-
+                    elif (
+                            (split_version[0] == 2) and (split_version[1] >= 4)
+                         ) or split_version[0] == 3:
                         accesses_ps = float(
                             status_output['indexCounters']['accesses'] -
                             self.mongo_DB_store['indexCounters']['accessesPS']
