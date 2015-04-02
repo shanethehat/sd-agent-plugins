@@ -303,13 +303,8 @@ class Mongodb(object):
                                 self.mongo_DB_store['indexCounters']
                                 ['missRatioPS']
                             ) / 60
-
                     else:
-                        self.checks_logger.debug(
-                            'mongodb_plugin: per second metrics negative value'
-                            ' calculated, mongod likely restarted, so clearing'
-                            ' cache'
-                        )
+                        accesses_ps = -1
 
                     if accesses_ps >= 0:
                         status['opCounters_insertPS'] = float(
@@ -348,6 +343,13 @@ class Mongodb(object):
                         status['asserts_rolloversPS'] = float(
                             status_output['asserts']['rollovers'] -
                             self.mongo_DB_store['asserts']['rolloversPS']) / 60
+                    else:
+                        self.checks_logger.debug(
+                            'mongodb_plugin: per second metrics negative value'
+                            ' calculated, mongod likely restarted, so clearing'
+                            ' cache or unsuported mongodb server version'
+                        )
+
                     if 'globalLock' in self.mongo_DB_store:
                         total_time = float(
                             status_output['globalLock']['totalTime'] -
