@@ -303,6 +303,31 @@ class Mongodb(object):
                                 self.mongo_DB_store['indexCounters']
                                 ['missRatioPS']
                             ) / 60
+
+                    elif (split_version[0] <= 3) and (split_version[1] >= 0):
+
+                        accesses_ps = float(
+                            status_output['indexCounters']['accesses'] -
+                            self.mongo_DB_store['indexCounters']['accessesPS']
+                        ) / 60
+
+                        if accesses_ps >= 0:
+                            status['indexCounters_accessesPS'] = accesses_ps
+                            status['indexCounters_hitsPS'] = float(
+                                status_output['indexCounters']['hits'] -
+                                self.mongo_DB_store['indexCounters']['hitsPS']
+                            ) / 60
+                            status['indexCounters_missesPS'] = float(
+                                status_output['indexCounters']['misses'] -
+                                self.mongo_DB_store['indexCounters']
+                                ['missesPS']
+                            ) / 60
+                            status['indexCounters_missRatioPS'] = float(
+                                status_output['indexCounters']['missRatio'] -
+                                self.mongo_DB_store['indexCounters']
+                                ['missRatioPS']
+                            ) / 60
+
                     else:
                         self.checks_logger.debug(
                             'mongodb_plugin: per second metrics negative value'
