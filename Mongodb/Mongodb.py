@@ -280,7 +280,8 @@ class Mongodb(object):
                                 ['missRatioPS']
                             ) / 60
 
-                    elif (split_version[0] <= 2) and (split_version[1] >= 4):
+                    elif ((split_version[0] == 2) and (split_version[1] >= 4)
+                            or (split_version[0] == 3)):
 
                         accesses_ps = float(
                             status_output['indexCounters']['accesses'] -
