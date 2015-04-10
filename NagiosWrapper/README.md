@@ -24,6 +24,8 @@ nagiosPluginsCommandLines = [
 
 The `check_mailq` plugin is installed along with Nagios. `check_sensors` is a [3rd party plugin](http://exchange.nagios.org/directory/Plugins/System-Metrics/Environmental/check_sensors/details).
 
+Raw plugin data can be found in the Server Density UI under the Plugins tab you've installed this plugin on.
+
 Alerts
 ------
 
