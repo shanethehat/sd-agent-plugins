@@ -115,7 +115,7 @@ class MySQL(object):
             return False
 
         # Note, code here doesn't really make sense. See what I copied.
-        if not self.raw_config['MySQLServer'].get('mysql_port'):
+        if self.raw_config['MySQLServer'].get('mysql_server'):
             # Connect
             try:
                 MySQLdb.connect(
