@@ -121,7 +121,7 @@ class MySQL(object):
                 MySQLdb.connect(
                     host=self.raw_config['MySQLServer']['mysql_server'],
                     user=self.raw_config['MySQLServer']['mysql_user'],
-                    passw=self.raw_config['MySQLServer']['mysql_pass'],
+                    passwd=self.raw_config['MySQLServer']['mysql_pass'],
                     port=int(self.raw_config['MySQLServer']['mysql_port'])
                     )
             except MySQLdb.OperationalError as message:
