@@ -45,7 +45,7 @@ Then install the Python setuptools by following the instructions on the website.
 
 ## 2. Agent configuration
 
-The agent /etc/sd-agent/config.cfg file requires 3 additional config lines to be completed to allow the agent to connect to your MySQL server. 
+The agent /etc/sd-agent/config.cfg file requires 3 additional config lines to be completed to allow the agent to connect to your MySQL server. In other words, the mysql config section under ´[Main]´ should be empty and the section below should be added to config.cfg
 
     [MySQLServer]
     mysql_server:
