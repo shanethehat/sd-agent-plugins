@@ -235,7 +235,10 @@ class MySQL(object):
 
             except MySQLdb.OperationalError as message:
                 self.checks_logger.error(
-                    'mysql: MySQL query error when getting version: {0}'.format(
+                    (
+                        'mysql: MySQL query error when getting version: '
+                        '{0}'
+                    ).format(
                         message)
                     )
                 return False
