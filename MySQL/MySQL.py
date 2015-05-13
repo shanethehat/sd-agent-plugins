@@ -84,7 +84,7 @@ class MySQL(object):
                 self.datastore.get(command) != 0):
             self.checks_logger.debug(
                 'mysql: Datastore unset for '
-                '{}, storing for first time'.format(command))
+                '{0}, storing for first time'.format(command))
             self.datastore[command] = result
             com_per_s = 0
         else:
@@ -126,7 +126,7 @@ class MySQL(object):
                     )
             except MySQLdb.OperationalError as message:
                 self.checks_logger.error(
-                    "mysql: MySQL connection error: {}".format(message))
+                    "mysql: MySQL connection error: {0}".format(message))
                 return False
         elif (self.raw_config['MySQLServer'].get('mysql_ssl_cert') and
                 self.raw_config['MySQLServer'].get('mysql_ssl_key')):
@@ -151,7 +151,7 @@ class MySQL(object):
                     port=int(self.raw_config['MySQLServer']['mysql_port']))
             except MySQLdb.OperationalError as message:
                 self.checks_logger.error(
-                    'mysql: MySQL connection error: {}'.format(message)
+                    'mysql: MySQL connection error: {0}'.format(message)
                     )
                 return False
         return True
@@ -235,7 +235,10 @@ class MySQL(object):
 
             except MySQLdb.OperationalError as message:
                 self.checks_logger.error(
-                    'mysql: MySQL query error when getting version: {}'.format(
+                    (
+                        'mysql: MySQL query error when getting version: '
+                        '{0}'
+                    ).format(
                         message)
                     )
                 return False
@@ -427,7 +430,7 @@ class MySQL(object):
             except MySQLdb.OperationalError as message:
                 self.checks_logger.error(
                     'mysql: MySQL query error when '
-                    'getting checkpoint age = {}'.format(
+                    'getting checkpoint age = {0}'.format(
                         message)
                 )
                 return False
@@ -453,7 +456,7 @@ class MySQL(object):
             except MySQLdb.OperationalError as message:
                 self.checks_logger.error(
                     'mysql: MySQL query error when '
-                    'getting key cache = {}'.format(
+                    'getting key cache = {0}'.format(
                         message)
                 )
                 return False
@@ -493,7 +496,7 @@ class MySQL(object):
         except Exception:
             self.checks_logger.error(
                 'mysql: unable to get data from MySQL - '
-                'Exception: {}'.format(traceback.format_exc())
+                'Exception: {0}'.format(traceback.format_exc())
                 )
 
         self.checks_logger.debug('mysql: completed, returning')
