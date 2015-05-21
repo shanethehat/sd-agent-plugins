@@ -29,11 +29,12 @@ class NagiosWrapper:
             )
             out, err = p.communicate()
 
-            self.checksLogger.debug('Output of {}: {}'.format(pluginCommand, out))
+            self.checksLogger.debug('Output of {0}: {1}'.format(pluginCommand, out))
 
             if err:
-                self.checksLogger.error('Error executing {}: {}'.format(
-                    pluginCommand, err))
+                self.checksLogger.error(
+                    'Error executing {0}: {1}'.format(pluginCommand, err)
+                )
 
             # the check command name = return value:
             # 0 - OK
