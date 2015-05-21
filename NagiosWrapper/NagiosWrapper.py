@@ -29,7 +29,9 @@ class NagiosWrapper:
             )
             out, err = p.communicate()
 
-            self.checksLogger.debug('Output of {0}: {1}'.format(pluginCommand, out))
+            self.checksLogger.debug(
+                'Output of {0}: {1}'.format(pluginCommand, out)
+            )
 
             if err:
                 self.checksLogger.error(
