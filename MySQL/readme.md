@@ -85,7 +85,7 @@ You can add further parameters to monitor if you would like by including the fol
 
 ### Users
 
-You can use any user to connect to the database. The user will need process privilege to be able to gather `Checkpoint age` from the command `'SHOW ENGINE INNODB STATUS'`. We recommend that you create a specific user with this privilege. See the [MySQL documentation for user management instructions](http://dev.mysql.com/doc/refman/5.1/en/user-account-management.html).
+You can use any user to connect to the database that has the process privilege. The user will need process privilege to be able to gather `Checkpoint age` from the command `'SHOW ENGINE INNODB STATUS'`. We recommend that you create a specific user with this privilege. See the [MySQL documentation for user management instructions](http://dev.mysql.com/doc/refman/5.1/en/user-account-management.html). In short the command that needs to be run in the database is the following `GRANT PROCESS ON * . * TO ‘[username]’@'[server]’;`
 
 
 ## 3. Restart agent
