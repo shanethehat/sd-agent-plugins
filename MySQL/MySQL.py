@@ -25,7 +25,6 @@ COMMANDS = [
     'Com_rollback',
     'Handler_commit',
     'Handler_delete',
-    'Handler_delete',
     'Handler_update',
     'Handler_write',
     'Handler_rollback',
