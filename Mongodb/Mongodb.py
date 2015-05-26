@@ -6,7 +6,7 @@ https://www.serverdensity.com/plugins/mongodb/
 https://github.com/serverdensity/sd-agent-plugins/
 
 
-Version: 1.0.0
+Version: 1.1.0
 """
 
 import collections
@@ -280,8 +280,9 @@ class Mongodb(object):
                                 ['missRatioPS']
                             ) / 60
 
-                    elif (split_version[0] <= 2) and (split_version[1] >= 4):
-
+                    elif (
+                            (split_version[0] == 2) and (split_version[1] >= 4)
+                         ) or split_version[0] == 3:
                         accesses_ps = float(
                             status_output['indexCounters']['accesses'] -
                             self.mongo_DB_store['indexCounters']['accessesPS']
@@ -304,11 +305,7 @@ class Mongodb(object):
                                 ['missRatioPS']
                             ) / 60
                     else:
-                        self.checks_logger.debug(
-                            'mongodb_plugin: per second metrics negative value'
-                            ' calculated, mongod likely restarted, so clearing'
-                            ' cache'
-                        )
+                        accesses_ps = -1
 
                     if accesses_ps >= 0:
                         status['opCounters_insertPS'] = float(
@@ -347,6 +344,13 @@ class Mongodb(object):
                         status['asserts_rolloversPS'] = float(
                             status_output['asserts']['rollovers'] -
                             self.mongo_DB_store['asserts']['rolloversPS']) / 60
+                    else:
+                        self.checks_logger.debug(
+                            'mongodb_plugin: per second metrics negative value'
+                            ' calculated, mongod likely restarted, so clearing'
+                            ' cache or unsuported mongodb server version'
+                        )
+
                     if 'globalLock' in self.mongo_DB_store:
                         total_time = float(
                             status_output['globalLock']['totalTime'] -

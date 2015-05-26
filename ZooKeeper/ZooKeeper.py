@@ -1,6 +1,6 @@
 """
 Server Density Plugin
-Mongodb
+ZooKeeper
 
 https://www.serverdensity.com/plugins/ZooKeeper/
 https://github.com/serverdensity/sd-agent-plugins/
@@ -14,7 +14,7 @@ import traceback
 
 
 class ZooKeeper(object):
-    """Plugin class to manage extracting the data from Mongo
+    """Plugin class to manage extracting the data from ZooKeeper
        for the sd-agent.
     """
 

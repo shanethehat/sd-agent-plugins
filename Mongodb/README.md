@@ -39,6 +39,10 @@ git clone git://github.com/mongodb/mongo-python-driver.git pymongo
 cd pymongo
 sudo python setup.py install
 ```
+  or
+  ```
+sudo apt-get install --no-install-recommends python-pymongo
+```
   (pip is recommended if it's available)
 
 3. Download the [Mongodb.py](Mongodb.py) plugin file into your [Server Density agent plugin directory](/README.md).

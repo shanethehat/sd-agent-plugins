@@ -22,8 +22,21 @@ class NagiosWrapper:
             # the check command to retrieve it's name
             pluginCommand = pluginCommandLineList[0]
 
-            p = subprocess.Popen(pluginCommandLineList, stdout=subprocess.PIPE)
+            p = subprocess.Popen(
+                pluginCommandLineList,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE
+            )
             out, err = p.communicate()
+
+            self.checksLogger.debug(
+                'Output of {0}: {1}'.format(pluginCommand, out)
+            )
+
+            if err:
+                self.checksLogger.error(
+                    'Error executing {0}: {1}'.format(pluginCommand, err)
+                )
 
             # the check command name = return value:
             # 0 - OK

@@ -13,8 +13,7 @@ Installing
 ----------
 
 1. Download the `NagiosWrapper.py` plugin file and place it into your sd-agent plugin directory. If you have not installed a plugin before you need to create a directory the agent will be able to read/write to then update the `/etc/sd-agent/config.cfg` file to include the location of that directory. We recommend `/usr/bin/sd-agent/plugins/`.
-2. From the Server Density web UI, click the Plugins tab then click Add. Use the name `NagiosWrapper`.
-3. Edit the `NagiosWrapper.py` file to include the paths to the plugins you want the agent to execute. Then restart the agent. The plugin uses 2 sample plugins by default:
+2. Edit the `NagiosWrapper.py` file to include the paths to the plugins you want the agent to execute. Then restart the agent. The plugin uses 2 sample plugins by default:
 
 ```python
 nagiosPluginsCommandLines = [
@@ -24,6 +23,8 @@ nagiosPluginsCommandLines = [
 ```
 
 The `check_mailq` plugin is installed along with Nagios. `check_sensors` is a [3rd party plugin](http://exchange.nagios.org/directory/Plugins/System-Metrics/Environmental/check_sensors/details).
+
+Raw plugin data can be found in the Server Density UI under the Plugins tab you've installed this plugin on.
 
 Alerts
 ------
