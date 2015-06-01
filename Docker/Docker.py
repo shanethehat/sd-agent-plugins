@@ -1,8 +1,7 @@
 """
   Server Density Plugin
-  Temperature measurements
+  Docker stats
 
-  https://www.serverdensity.com/plugins/temperatures/
   https://github.com/serverdensity/sd-agent-plugins/
 
 
