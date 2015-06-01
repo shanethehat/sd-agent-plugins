@@ -102,7 +102,19 @@ class Docker(object):
                 if not line or line.startswith('CONTAINER ID'):
                     continue
                 line = line.split()
-                names[line[0]] = line[-1]
+                container_id = line[0]
+
+                # Now let's retrieve the 'canonical' name for the container
+                proc = subprocess.Popen(
+                    ['sudo', 'docker', 'inspect',
+                     '--format=\'{{.Name}}\'', container_id],
+                    stdout=subprocess.PIPE,
+                    close_fds=True)
+
+                # Stripping whitespaces, line end and the leading forward '/'
+                container_name = proc.communicate()[0].strip('\n/ ')
+
+                names[container_id] = container_name
 
         except Exception as exception:
             self.checks_logger.error(
