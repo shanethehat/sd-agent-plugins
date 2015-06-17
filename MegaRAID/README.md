@@ -5,6 +5,9 @@ This plugin is for MegaRAID
 
 Setup
 ---
+Depending on how you are running the agent you maybe need to give the sd-agent more permissions.
+[plugins requiring sudo](https://support.serverdensity.com/hc/en-us/articles/201253683-Plugins-requiring-sudo)
+has more information.
 
 Linux
 ---

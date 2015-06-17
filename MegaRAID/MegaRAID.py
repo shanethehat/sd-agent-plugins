@@ -32,7 +32,8 @@ class MegaRAID(object):
 
         try:
             proc = subprocess.Popen(
-                ['/opt/MegaRAID/MegaCli/MegaCli64 -LDInfo -Lall -aALL'],
+                ['sudo', '/opt/MegaRAID/MegaCli/MegaCli64', '-LDInfo',
+                 '-Lall', '-aALL'],
                 stdout=subprocess.PIPE,
                 close_fds=True)
             output = proc.communicate()[0]
