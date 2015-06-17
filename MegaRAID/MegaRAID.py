@@ -28,8 +28,8 @@ class MegaRAID(object):
 
     def run(self):
 
-        data = {'state' : 'unknown'}
-        
+        data = {'state': 'unknown'}
+
         try:
             proc = subprocess.Popen(
                 ['/opt/MegaRAID/MegaCli/MegaCli64 -LDInfo -Lall -aALL'],
@@ -38,10 +38,10 @@ class MegaRAID(object):
             output = proc.communicate()[0]
         except OSError as exception:
             self.checks_logger.error(
-                        'Unable to find /opt/MegaRAID/MegaCli/MegaCli64.'
-                        'Error: {0}'.format(exception.message))
+                'Unable to find /opt/MegaRAID/MegaCli/MegaCli64.'
+                ' Error: {0}'.format(exception.message))
             return data
-       
+
         for line in output.split("\n"):
             print line
             if line.startswith('State'):
