@@ -48,7 +48,7 @@ class ZooKeeper(object):
                     host = self.raw_config['ZooKeeper'].get(
                         'host', 'localhost')
                     port = int(self.raw_config['ZooKeeper'].get(
-                        'host', '2181'))
+                        'port', '2181'))
 
                 s.connect(
                     (host, port)
