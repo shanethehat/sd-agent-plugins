@@ -6,8 +6,8 @@ This plugin gets stats from a [HAProxy server](http://www.haproxy.org/)
 Configuration
 ---
 1. This plugin uses a new section of the configuration file called ```HAProxyPro```. All the configuration entries should be in it for the plugin to read them.
-2. Set your HAProxy host and port
-Example: ``haproxy_url: http://USER:PASS@localhost:8080/clusterstats``
+2. Set your HAProxy stats host and port - see [setting up HAProxy stats](http://tecadmin.net/how-to-configure-haproxy-statics/)
+Example: ``haproxy_url: http://USER:PASS@localhost:5000/stats``
 3. Restart the agent.
 
 Config Parameters
