@@ -3,7 +3,7 @@
   HA Proxy
   https://github.com/serverdensity/sd-agent-plugins/
   
-  Plugin was originally developed by https://github.com/rex 
+  Version 1.0.0
 """
 
 import csv
@@ -41,11 +41,11 @@ class HAProxyPro:
   def main( self ):
     self.logger.debug("HAProxy - inside main()")
 
-    if 'haproxy_url' not in self.raw_config['Main']:
+    if 'haproxy_url' not in self.raw_config['HaProxyPro']:
       self.logger.error("HAProxy - haproxy_url required in /etc/sd-agent/config.cfg but missing")
       return False
 
-    self.status_page_url = self.raw_config['Main']['haproxy_url'] + "/;csv;norefresh"
+    self.status_page_url = self.raw_config['HaProxyPro']['haproxy_url'] + "/;csv;norefresh"
     self.getStatusPage()
     self.logger.debug("HAProxy - status page")
     self.parseStatusPage()
