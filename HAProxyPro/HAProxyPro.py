@@ -19,20 +19,8 @@ class HAProxyPro:
         self.agent_config = agentConfig
         self.logger = logger
         self.raw_config = rawConfig
-        self.csv_filepath = '/etc/sd-agent/response.csv'
 
         logger.debug("HAProxy - initialized")
-
-    def debug(self):
-        self.logger.debug("HAProxy - agentConfig keys")
-        self.logger.debug(self.agent_config.keys())
-        self.logger.debug("HAProxy - rawConfig keys")
-        self.logger.debug(self.raw_config.keys())
-        self.logger.debug({
-            'date': datetime.today(),
-            'agentConfig': self.agent_config,
-            'rawConfig': self.raw_config
-        })
 
     def num(self, s):
         if s:
@@ -64,11 +52,9 @@ class HAProxyPro:
     def parseStatusPage(self):
         self.parsed_status = []
 
-        f = open('/etc/sd-agent/parsed_status.csv', 'w')
         reader = csv.DictReader(self.raw_status.split('\n'), delimiter=',')
         for row in reader:
             self.parsed_status.append(row)
-            f.write("%s\n" % row)
 
     def createKeyedStatus(self):
         self.servers = {}
@@ -139,7 +125,6 @@ class HAProxyPro:
         self.logger.debug(
             "Running in directory: " + os.getcwd() +
             " in path " + os.path.realpath(__file__))
-        self.debug()
 
         try:
             self.logger.debug("HAProxy - running main()")
