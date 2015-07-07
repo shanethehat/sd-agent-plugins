@@ -474,9 +474,12 @@ class MySQL(object):
                 user_com_ps = COMMANDS
 
             for command in user_com_ps:
-                com_per_s = self.calculate_per_s(
-                    command, status_metrics[command])
-                status[command.replace('_', ' ')+'/s'] = com_per_s
+                try:
+                    com_per_s = self.calculate_per_s(
+                        command, status_metrics[command])
+                    status[command.replace('_', ' ')+'/s'] = com_per_s
+                except KeyError, e:
+                    self.checks_logger.exception(e)
 
             if self.raw_config['MySQLServer'].get('mysql_include'):
                 user_com = self.raw_config['MySQLServer']['mysql_include']
