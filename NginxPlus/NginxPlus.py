@@ -199,4 +199,3 @@ class NginxPlus (object):
         self.checksLogger.debug('NginxPlus: parsed JSON')
 
         return status
-        
