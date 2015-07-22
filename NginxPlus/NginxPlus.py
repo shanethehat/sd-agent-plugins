@@ -21,8 +21,8 @@ class NginxPlus (object):
         self.rawConfig = rawConfig
 
     def run(self):
-        if self.agentConfig.get('nginxStatusUrl') != '':
-            self.mainLogger.debug('NginxPlus: starting')
+        if self.agentConfig.get('nginx_status_url') != '':
+            self.checksLogger.debug('NginxPlus: starting')
 
             status = self.getStatus()
 
@@ -147,55 +147,56 @@ class NginxPlus (object):
                 return False
 
         else:
-            self.mainLogger.debug('NginxPlus: Nginx status URL not set')
+            self.checksLogger.debug('NginxPlus: Nginx status URL not set')
             return False
 
     def getStatus(self):
         try:
-            self.mainLogger.debug('NginxPlus: attempting urlopen')
+            self.checksLogger.debug('NginxPlus: attempting urlopen')
 
             req = urllib2.Request(
-                self.agentConfig['nginxStatusUrl'], None, headers)
+                self.agentConfig['nginx_status_url'], None, headers)
 
             # Do the request, log any errors
             request = urllib2.urlopen(req)
             response = request.read()
 
         except urllib2.HTTPError, e:
-            self.mainLogger.error(
+            self.checksLogger.error(
                 'NginxPlus: Unable to get Nginx status - HTTPError = %s', e)
             return False
 
         except urllib2.URLError, e:
-            self.mainLogger.error(
+            self.checksLogger.error(
                 'NginxPlus: Unable to get Nginx status - URLError = %s', e)
             return False
 
         except httplib.HTTPException, e:
-            self.mainLogger.error(
+            self.checksLogger.error(
                 'NginxPlus: Unable to get Nginx status - HTTPException = %s',
                 e)
             return False
 
         except Exception:
             import traceback
-            self.mainLogger.error(
+            self.checksLogger.error(
                 'NginxPlus: Unable to get Nginx status - Exception = %s',
                 traceback.format_exc())
             return False
 
-        self.mainLogger.debug('NginxPlus: urlopen success')
+        self.checksLogger.debug('NginxPlus: urlopen success')
 
         try:
             status = json.loads(response)
 
         except Exception:
             import traceback
-            self.mainLogger.error(
+            self.checksLogger.error(
                 'NginxPlus: JSON parsing error - Exception = %s',
                 traceback.format_exc())
             return False
 
-        self.mainLogger.debug('NginxPlus: parsed JSON')
+        self.checksLogger.debug('NginxPlus: parsed JSON')
 
         return status
+        
