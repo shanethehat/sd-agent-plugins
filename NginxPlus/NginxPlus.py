@@ -174,7 +174,13 @@ class NginxPlus (object):
         except httplib.HTTPException, e:
             self.checksLogger.error(
                 'NginxPlus: Unable to get Nginx status - HTTPException = %s',
-                e)
+                e
+            )
+            return False
+
+        except KeyError, e:
+            self.checksLogger.error(
+                'NginxPlus: Nginx status URL not set = %s', e)
             return False
 
         except Exception:
