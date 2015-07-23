@@ -17,7 +17,7 @@ location = /status {
 }
 ```
 
-3. Set the Server Density agent `nginx_status_url` config value to the full URL to access the above status handler e.g. `http://localhost/status`.
+3. Set the Server Density agent `nginx_status_url` config value to the full URL to access the above status handler e.g. `http://localhost/status`. You can read more about setting config values in our [help docs](https://support.serverdensity.com/hc/en-us/articles/201003178-Agent-config-variables)
 4. Download the [NginxPlus.py](NginxPlus.py) plugin file into your [Server Density agent plugin directory](/README.md).
 5. Restart the agent.
 
