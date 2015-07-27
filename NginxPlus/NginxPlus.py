@@ -155,7 +155,7 @@ class NginxPlus (object):
             self.checksLogger.debug('NginxPlus: attempting urlopen')
 
             req = urllib2.Request(
-                self.rawConfig['nginx_status_url'], None, headers)
+                self.rawConfig['nginx_status_url'])
 
             # Do the request, log any errors
             request = urllib2.urlopen(req)
