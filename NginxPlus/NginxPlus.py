@@ -21,7 +21,7 @@ class NginxPlus (object):
         self.rawConfig = rawConfig
 
     def run(self):
-        if self.agentConfig.get('nginx_status_url') != '':
+        if self.rawConfig.get('nginx_status_url') != '':
             self.checksLogger.debug('NginxPlus: starting')
 
             status = self.getStatus()
@@ -155,7 +155,7 @@ class NginxPlus (object):
             self.checksLogger.debug('NginxPlus: attempting urlopen')
 
             req = urllib2.Request(
-                self.agentConfig['nginx_status_url'], None, headers)
+                self.rawConfig['nginx_status_url'])
 
             # Do the request, log any errors
             request = urllib2.urlopen(req)
