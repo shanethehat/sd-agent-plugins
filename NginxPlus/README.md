@@ -8,7 +8,7 @@ Configuration
 1. You must be using [Nginx Plus](http://nginx.com/products/).
 2. Configure the status handler in your Nginx server configuration:
 
-   ```
+```
 location = /status {
     allow 192.168.0.0/16; # permit access from local network
     deny all; # deny access from everywhere else
@@ -16,8 +16,14 @@ location = /status {
     status;
 }
 ```
+3. Add the following config value to `/etc/sd-agent/config.cfg` at the end of the file.  
 
-3. Set the Server Density agent `nginx_status_url` config value to the full URL to access the above status handler e.g. `http://localhost/status`. You can read more about setting config values in our [help docs](https://support.serverdensity.com/hc/en-us/articles/201003178-Agent-config-variables)
+```
+[nginxplus]
+nginx_status_url: http://localhost/status
+```
+
+You can read more about setting config values in our [help docs](https://support.serverdensity.com/hc/en-us/articles/201003178-Agent-config-variables)
 4. Download the [NginxPlus.py](NginxPlus.py) plugin file into your [Server Density agent plugin directory](/README.md).
 5. Restart the agent.
 
@@ -32,4 +38,4 @@ Recommended alerts
 * `requests_current` - as above, but for the number of requests being served.
 * The `zone_*` metrics are reported for each of your server zones. It is useful to graph the number of requests and responses but alerts can be configured on the `zone_*_responses_5xx` metric because this gives the number of internal server errors. High numbers mean problems on the server.
 * The `upstream_*` metrics are similar to the `zone_*` metrics but it is recommended to set an alert on `upstream_*_*_state` `!=` `up`. This allows you to be alerted when one of your upstream servers is down or otherwise unavailable. 
-  * Related to this is the `upstream_*_*_unavail` count - if this is high then many requests are failing.
+* Related to this is the `upstream_*_*_unavail` count - if this is high then many requests are failing.

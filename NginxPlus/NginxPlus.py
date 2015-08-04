@@ -21,7 +21,7 @@ class NginxPlus (object):
         self.rawConfig = rawConfig
 
     def run(self):
-        if self.rawConfig.get('nginx_status_url') != '':
+        if self.rawConfig['nginxplus'].get('nginx_status_url'):
             self.checksLogger.debug('NginxPlus: starting')
 
             status = self.getStatus()
@@ -155,7 +155,7 @@ class NginxPlus (object):
             self.checksLogger.debug('NginxPlus: attempting urlopen')
 
             req = urllib2.Request(
-                self.rawConfig['nginx_status_url'])
+                self.rawConfig['nginxplus'].get('nginx_status_url'))
 
             # Do the request, log any errors
             request = urllib2.urlopen(req)
@@ -205,3 +205,30 @@ class NginxPlus (object):
         self.checksLogger.debug('NginxPlus: parsed JSON')
 
         return status
+
+if __name__ == "__main__":
+    """Standalone test
+    """
+
+    import logging
+    import sys
+    import time
+
+    raw_agent_config = {
+        'nginxplus': {
+            'nginx_status_url': 'http://localhost/status',
+        }
+    }
+
+    main_checks_logger = logging.getLogger('NginxPlugin')
+    main_checks_logger.setLevel(logging.DEBUG)
+    main_checks_logger.addHandler(logging.StreamHandler(sys.stdout))
+    nginx_check = NginxPlus({}, main_checks_logger, raw_agent_config)
+    while True:
+        try:
+            result = nginx_check.run()
+            print(json.dumps(result, indent=4, sort_keys=True))
+        except:
+            main_checks_logger.exception("Unhandled exception")
+        finally:
+            time.sleep(60)
