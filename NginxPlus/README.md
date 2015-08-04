@@ -7,7 +7,6 @@ Configuration
 ---
 1. You must be using [Nginx Plus](http://nginx.com/products/).
 2. Configure the status handler in your Nginx server configuration:
-
 ```
 location = /status {
     allow 192.168.0.0/16; # permit access from local network
@@ -17,12 +16,10 @@ location = /status {
 }
 ```
 3. Add the following config value to `/etc/sd-agent/config.cfg` at the end of the file.  
-
 ```
 [nginxplus]
 nginx_status_url: http://localhost/status
 ```
-
 You can read more about setting config values in our [help docs](https://support.serverdensity.com/hc/en-us/articles/201003178-Agent-config-variables)
 4. Download the [NginxPlus.py](NginxPlus.py) plugin file into your [Server Density agent plugin directory](/README.md).
 5. Restart the agent.
