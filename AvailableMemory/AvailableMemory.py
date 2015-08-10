@@ -2,7 +2,7 @@ import subprocess
 import re
 
 
-class FreeMemory:
+class AvailableMemory:
     def __init__(self, agentConfig, checksLogger, rawConfig):
         self.agentConfig = agentConfig
         self.checksLogger = checksLogger
@@ -26,9 +26,9 @@ class FreeMemory:
             self.checksLogger.error(
                 'Error executing memory information: {0}'.format(errorOutput))
 
-        matches = re.search('cache:\s+\d+\s+(?P<total_free>\d+)', freeOutput)
+        matches = re.search('cache:\s+\d+\s+(?P<available>\d+)', freeOutput)
 
         if matches:
-            data['Free memory'] = matches.group('total_free')
+            data['Available memory'] = matches.group('available')
 
         return data
