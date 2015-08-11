@@ -37,8 +37,8 @@ class HAProxyPro:
                 "but missing")
             return False
 
-        self.status_page_url = self.raw_config[
-            'HaProxyPro']['haproxy_url'] + "/;csv;norefresh"
+        self.status_page_url = (self.raw_config['HAProxyPro']['haproxy_url']
+                                + "/;csv;norefresh")
         self.getStatusPage()
         self.logger.debug("HAProxy - status page")
         self.parseStatusPage()
