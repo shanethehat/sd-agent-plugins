@@ -36,8 +36,8 @@ class HAProxyPro:
                 "but missing")
             return False
 
-        self.status_page_url = (self.raw_config['HAProxyPro']['haproxy_url']
-                                + "/;csv;norefresh")
+        self.status_page_url = (self.raw_config['HAProxyPro']['haproxy_url'] +
+                                "/;csv;norefresh")
         self.getStatusPage()
         self.logger.debug("HAProxy - status page")
         self.parseStatusPage()
@@ -131,3 +131,4 @@ class HAProxyPro:
         except Exception, e:
             import traceback
             self.logger.error('HAProxy - failure \n' + traceback.format_exc())
+0
