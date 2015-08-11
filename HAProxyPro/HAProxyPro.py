@@ -9,7 +9,6 @@
 import csv
 import os
 from urllib import urlopen
-from datetime import date, datetime
 
 
 class HAProxyPro:
