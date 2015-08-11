@@ -31,7 +31,7 @@ class HAProxyPro:
     def main(self):
         self.logger.debug("HAProxy - inside main()")
 
-        if 'haproxy_url' not in self.raw_config['HaProxyPro']:
+        if 'haproxy_url' not in self.raw_config['HAProxyPro']:
             self.logger.error(
                 "HAProxy - haproxy_url required in /etc/sd-agent/config.cfg "
                 "but missing")
