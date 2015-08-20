@@ -10,7 +10,6 @@ Version: 1.0.0
 """
 
 import socket
-import traceback
 
 
 class ZooKeeper(object):
