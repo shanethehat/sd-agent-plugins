@@ -10,7 +10,6 @@ Version: 1.0.0
 """
 
 import socket
-import traceback
 
 
 class ZooKeeper(object):
@@ -30,7 +29,18 @@ class ZooKeeper(object):
         ]
 
     def run(self):
+        if 'ZooKeeper' not in self.raw_config:
+            host = 'localhost'
+            port = 2181
+        else:
+            host = self.raw_config['ZooKeeper'].get(
+                'host', 'localhost')
+            port = int(self.raw_config['ZooKeeper'].get(
+                'port', '2181'))
+
         data = {}
+        data['imok'] = 1
+
         self.checks_logger.debug('ZooKeeper_plugin: started gathering data')
 
         for command in self.zookeeper_commands:
@@ -40,15 +50,6 @@ class ZooKeeper(object):
 
                 # set a timeout for socket operation
                 s.settimeout(4)
-
-                if 'ZooKeeper' not in self.raw_config:
-                    host = 'localhost'
-                    port = 2181
-                else:
-                    host = self.raw_config['ZooKeeper'].get(
-                        'host', 'localhost')
-                    port = int(self.raw_config['ZooKeeper'].get(
-                        'port', '2181'))
 
                 s.connect(
                     (host, port)
