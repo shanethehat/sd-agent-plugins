@@ -34,6 +34,7 @@ class Redis(object):
         self.host = self.raw_config['Redis'].get('host', 'localhost')
         self.port = int(self.raw_config['Redis'].get('port', '6379'))
         self.dbs = self.raw_config['Redis'].get('dbs', ['0'])
+        self.password = self.raw_config['Redis'].get('password', '')
 
     def run(self):
         import redis
@@ -43,7 +44,8 @@ class Redis(object):
             redis_connection = redis.StrictRedis(
                 host=self.host,
                 port=self.port,
-                db=int(db))
+                db=int(db),
+                password=self.password)
             stats = redis_connection.info()
 
         if not stats:
@@ -59,7 +61,7 @@ class Redis(object):
 
             try:
                 data[name] = float(value)
-            except ValueError:
+            except (ValueError, TypeError) as e:
                 # some values are text rather numbers
                 # fail and move on
                 pass
@@ -74,7 +76,8 @@ if __name__ == '__main__':
         'Redis': {
             'host': 'localhost',
             'port': '6379',
-            'dbs': '0'
+            'dbs': '0',
+            'password': ''
         }
     }
 
