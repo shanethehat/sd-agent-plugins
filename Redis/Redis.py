@@ -82,7 +82,8 @@ if __name__ == '__main__':
             'host': 'localhost',
             'port': '6379',
             'dbs': '0',
-            'password': ''
+            'password': '',
+            'queues': ''
         }
     }
 
