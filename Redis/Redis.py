@@ -68,7 +68,7 @@ class Redis(object):
                 pass
 
         for queueName in self.queues.split(','):
-            data[queueName + '_length'] = redis_connection.llen(queueName);
+            data[queueName + '_length'] = redis_connection.llen(queueName)
 
         return data
 
