@@ -26,9 +26,15 @@ class AvailableMemory:
             self.checksLogger.error(
                 'Error executing memory information: {0}'.format(errorOutput))
 
-        matches = re.search('cache:\s+\d+\s+(?P<available>\d+)', freeOutput)
+        old_ver = re.search('cache:\s+\d+\s+(?P<available>\d+)', freeOutput)
+        new_ver = re.search('Mem:(\s+\d+){5}\s+(?P<available>\d+)', freeOutput)
 
-        if matches:
-            data['Available memory'] = matches.group('available')
+        if old_ver:
+            data['Available memory'] = old_ver.group('available')
+        elif new_ver:
+            data['Available memory'] = new_ver.group('available')
+        else:
+            self.checksLogger.debug(
+                'Something went wrong, and the plugin returned no data')
 
         return data
