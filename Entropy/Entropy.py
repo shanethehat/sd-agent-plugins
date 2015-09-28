@@ -30,7 +30,7 @@ class Entropy(object):
                 "cat /proc/sys/kernel/random/entropy_avail", shell=True)
             data = {'available': float(e)}
         else:
-            self.checks_logger.error(
+            self.checksLogger.error(
                 'Plugin currently only available on Linux.')
         return data
 
