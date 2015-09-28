@@ -11,6 +11,8 @@ Install redis module : `pip install redis`
 
 Metrics
 ---
+- Global informations of Redis instance  
+- Queues length
 
 Recommended alerts
 ---
@@ -22,3 +24,4 @@ host: localhost
 port: 6379  
 dbs: 0,1  
 password: YourHashKey|none  
+queues: key1,key2

@@ -35,6 +35,7 @@ class Redis(object):
         self.port = int(self.raw_config['Redis'].get('port', '6379'))
         self.dbs = self.raw_config['Redis'].get('dbs', ['0'])
         self.password = self.raw_config['Redis'].get('password', '')
+        self.queues = self.raw_config['Redis'].get('queues', '')
 
     def run(self):
         import redis
@@ -65,6 +66,10 @@ class Redis(object):
                 # some values are text rather numbers
                 # fail and move on
                 pass
+
+        for queueName in self.queues.split(','):
+            data[queueName + '_length'] = redis_connection.llen(queueName)
+
         return data
 
 
@@ -77,7 +82,8 @@ if __name__ == '__main__':
             'host': 'localhost',
             'port': '6379',
             'dbs': '0',
-            'password': ''
+            'password': '',
+            'queues': ''
         }
     }
 
