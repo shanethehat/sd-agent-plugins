@@ -18,7 +18,7 @@ class RunningProcesses:
                 'Error detecting status of {0}: {1}'.format(
                     process.name, error))
 
-        self.data[process.name] = 1 if (returnCode == 0) else 0
+        self.data[process.name] = returnCode == 0
 
     def run(self):
         if 'Running Processes' not in self.rawConfig:
